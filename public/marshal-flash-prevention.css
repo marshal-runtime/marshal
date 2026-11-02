@@ -1,0 +1,23 @@
+/* Early background + color in external stylesheet prevents white flash
+   before the main app CSS loads. Must match the --background / --foreground
+   theme variables defined in src/index.css for both light and dark modes.
+   The media query covers system-dark users before JS sets data-theme. */
+html {
+  background: hsl(240, 30%, 98%);
+  color: hsl(240, 10%, 9%);
+}
+html[data-theme="dark"] {
+  background: hsl(240, 10%, 7%);
+  color: hsl(240, 14%, 92%);
+}
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) {
+    background: hsl(240, 10%, 7%);
+    color: hsl(240, 14%, 92%);
+  }
+}
+/* Once JS sets data-platform, clear the opaque splash background on macOS
+   so the native NSVisualEffectView vibrancy is visible. */
+html[data-platform="apple"] {
+  background: transparent !important;
+}

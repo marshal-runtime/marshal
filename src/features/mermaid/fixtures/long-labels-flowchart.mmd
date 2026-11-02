@@ -1,0 +1,8 @@
+flowchart LR
+  A["A very long label that keeps going and going to check wrapping inside a single node"] --> B{"Is the label measured<br/>after the Geist font has loaded?"}
+  B -- "yes, measured with the real font" --> C["Rendered without cropping ✅<br/>second line<br/>third line with more words"]
+  B -- "no" --> D["Text overflows the node shape and is cut off at the edge ❌"]
+  C --> E(("Done 🚀"))
+  D --> F[/"Parallelogram with a fairly long description"/]
+  F --> G[("Database: issue_records, root_causes, fix_links")]
+  G --> E

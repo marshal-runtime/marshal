@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/marshal-icon.svg" />
+    <!--
+      viewport-fit=cover lets the mobile client draw under the iPhone's
+      notch/status bar/home indicator, which is required for env(safe-area-
+      inset-*) to resolve to nonzero values — otherwise fixed-position UI
+      (e.g. RuntimeUiFullscreenSurface's Close button) can render underneath
+      the browser's own chrome, unreachable except via OS gestures.
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Marshal</title>
+    <link rel="stylesheet" href="/marshal-flash-prevention.css" />
+    <script src="/marshal-theme-init.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

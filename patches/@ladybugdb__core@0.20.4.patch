@@ -1,0 +1,268 @@
+diff --git a/connection.js b/connection.js
+index 61f6ef4..d3e108c 100644
+--- a/connection.js
++++ b/connection.js
+@@ -7,0 +8,30 @@ const PreparedStatement = require("./prepared_statement.js");
++function closeUnclaimedQueryResult(queryResult, error) {
++  try {
++    queryResult.close();
++    return error;
++  } catch (closeError) {
++    return new AggregateError(
++      [error, closeError],
++      "Query execution and native result cleanup failed."
++    );
++  }
++}
++
++function closeUnclaimedQueryResults(queryResults, error) {
++  const closeErrors = [];
++  for (const queryResult of queryResults) {
++    try {
++      queryResult.close();
++    } catch (closeError) {
++      closeErrors.push(closeError);
++    }
++  }
++  if (closeErrors.length === 0) {
++    return error;
++  }
++  return new AggregateError(
++    [error, ...closeErrors],
++    "Query result unwrapping and cleanup failed."
++  );
++}
++
+@@ -164 +194,3 @@ class Connection {
+-                  return reject(err);
++                  return reject(
++                    closeUnclaimedQueryResult(nodeQueryResult, err)
++                  );
+@@ -177 +209 @@ class Connection {
+-            return reject(e);
++            return reject(closeUnclaimedQueryResult(nodeQueryResult, e));
+@@ -213 +245,9 @@ class Connection {
+-    connection.executeSync(preparedStatement._preparedStatement, nodeQueryResult, paramArray);
++    try {
++      connection.executeSync(
++        preparedStatement._preparedStatement,
++        nodeQueryResult,
++        paramArray
++      );
++    } catch (e) {
++      throw closeUnclaimedQueryResult(nodeQueryResult, e);
++    }
+@@ -285 +325,3 @@ class Connection {
+-                return reject(err);
++                return reject(
++                  closeUnclaimedQueryResult(nodeQueryResult, err)
++                );
+@@ -297 +339 @@ class Connection {
+-            return reject(e);
++            return reject(closeUnclaimedQueryResult(nodeQueryResult, e));
+@@ -320 +362,5 @@ class Connection {
+-    connection.querySync(statement, nodeQueryResult);
++    try {
++      connection.querySync(statement, nodeQueryResult);
++    } catch (e) {
++      throw closeUnclaimedQueryResult(nodeQueryResult, e);
++    }
+@@ -344 +390,3 @@ class Connection {
+-                return reject(err);
++                return reject(
++                  closeUnclaimedQueryResult(nodeQueryResult, err)
++                );
+@@ -349 +397 @@ class Connection {
+-            return reject(e);
++            return reject(closeUnclaimedQueryResult(nodeQueryResult, e));
+@@ -373 +421,5 @@ class Connection {
+-    connection.queryArrowSync(statement, chunkSize, nodeQueryResult);
++    try {
++      connection.queryArrowSync(statement, chunkSize, nodeQueryResult);
++    } catch (e) {
++      throw closeUnclaimedQueryResult(nodeQueryResult, e);
++    }
+@@ -395 +447,11 @@ class Connection {
+-    connection.createArrowTableSync(tableName, schemaPtr, arraysPtr, numArrays, nodeQueryResult);
++    try {
++      connection.createArrowTableSync(
++        tableName,
++        schemaPtr,
++        arraysPtr,
++        numArrays,
++        nodeQueryResult
++      );
++    } catch (e) {
++      throw closeUnclaimedQueryResult(nodeQueryResult, e);
++    }
+@@ -428,9 +490,34 @@ class Connection {
+-    if (indptrSchemaPtr != null) {
+-      if (indptrArraysPtr == null) {
+-        throw new Error("indptrArraysPtr must be provided in CSR mode.");
+-      }
+-      if (!Array.isArray(indptrArraysPtr) && (!Number.isSafeInteger(numIndptrArrays) || numIndptrArrays <= 0)) {
+-        throw new Error("numIndptrArrays must be a positive integer.");
+-      }
+-      if (typeof dstColName !== "string") {
+-        throw new Error("dstColName must be a string.");
++    try {
++      if (indptrSchemaPtr != null) {
++        if (indptrArraysPtr == null) {
++          throw new Error("indptrArraysPtr must be provided in CSR mode.");
++        }
++        if (!Array.isArray(indptrArraysPtr) && (!Number.isSafeInteger(numIndptrArrays) || numIndptrArrays <= 0)) {
++          throw new Error("numIndptrArrays must be a positive integer.");
++        }
++        if (typeof dstColName !== "string") {
++          throw new Error("dstColName must be a string.");
++        }
++        connection.createArrowRelTableSync(
++          tableName,
++          srcTableName,
++          dstTableName,
++          schemaPtr,
++          arraysPtr,
++          numArrays,
++          indptrSchemaPtr,
++          indptrArraysPtr,
++          numIndptrArrays,
++          dstColName,
++          nodeQueryResult
++        );
++      } else {
++        connection.createArrowRelTableSync(
++          tableName,
++          srcTableName,
++          dstTableName,
++          schemaPtr,
++          arraysPtr,
++          numArrays,
++          nodeQueryResult
++        );
+@@ -438,23 +525,2 @@ class Connection {
+-      connection.createArrowRelTableSync(
+-        tableName,
+-        srcTableName,
+-        dstTableName,
+-        schemaPtr,
+-        arraysPtr,
+-        numArrays,
+-        indptrSchemaPtr,
+-        indptrArraysPtr,
+-        numIndptrArrays,
+-        dstColName,
+-        nodeQueryResult
+-      );
+-    } else {
+-      connection.createArrowRelTableSync(
+-        tableName,
+-        srcTableName,
+-        dstTableName,
+-        schemaPtr,
+-        arraysPtr,
+-        numArrays,
+-        nodeQueryResult
+-      );
++    } catch (e) {
++      throw closeUnclaimedQueryResult(nodeQueryResult, e);
+@@ -476 +542,5 @@ class Connection {
+-    connection.dropArrowTableSync(tableName, nodeQueryResult);
++    try {
++      connection.dropArrowTableSync(tableName, nodeQueryResult);
++    } catch (e) {
++      throw closeUnclaimedQueryResult(nodeQueryResult, e);
++    }
+@@ -494 +564,7 @@ class Connection {
+-        return resolve(new QueryResult(this, nextNodeQueryResult));
++        try {
++          return resolve(new QueryResult(this, nextNodeQueryResult));
++        } catch (error) {
++          return reject(
++            closeUnclaimedQueryResult(nextNodeQueryResult, error)
++          );
++        }
+@@ -505,9 +581,23 @@ class Connection {
+-    const wrappedQueryResult = new QueryResult(this, nodeQueryResult);
+-    if (!nodeQueryResult.hasNextQueryResult()) {
+-      return wrappedQueryResult;
+-    }
+-    const queryResults = [wrappedQueryResult];
+-    let currentQueryResult = nodeQueryResult;
+-    while (currentQueryResult.hasNextQueryResult()) {
+-      queryResults.push(await this._getNextQueryResult(currentQueryResult));
+-      currentQueryResult = queryResults[queryResults.length - 1]._queryResult;
++    const queryResults = [];
++    try {
++      const wrappedQueryResult = new QueryResult(this, nodeQueryResult);
++      queryResults.push(wrappedQueryResult);
++      if (!nodeQueryResult.hasNextQueryResult()) {
++        return wrappedQueryResult;
++      }
++      let currentQueryResult = nodeQueryResult;
++      while (currentQueryResult.hasNextQueryResult()) {
++        const nextQueryResult =
++          await this._getNextQueryResult(currentQueryResult);
++        if (!nextQueryResult) {
++          throw new Error("Expected another query result.");
++        }
++        queryResults.push(nextQueryResult);
++        currentQueryResult = nextQueryResult._queryResult;
++      }
++      return queryResults;
++    } catch (error) {
++      if (queryResults.length === 0) {
++        throw closeUnclaimedQueryResult(nodeQueryResult, error);
++      }
++      throw closeUnclaimedQueryResults(queryResults, error);
+@@ -515 +604,0 @@ class Connection {
+-    return queryResults;
+@@ -525,13 +614,26 @@ class Connection {
+-    const wrappedQueryResult = new QueryResult(this, nodeQueryResult);
+-    if (!nodeQueryResult.hasNextQueryResult()) {
+-      return wrappedQueryResult;
+-    }
+-    const queryResults = [wrappedQueryResult];
+-    let currentQueryResult = nodeQueryResult;
+-    while (currentQueryResult.hasNextQueryResult()) {
+-      const nextNodeQueryResult = currentQueryResult.getNextQueryResultSync();
+-      const nextQueryResult = new QueryResult(this, nextNodeQueryResult);
+-      queryResults.push(nextQueryResult);
+-      currentQueryResult = nextNodeQueryResult;
+-    }
+-    return queryResults;
++    const queryResults = [];
++    try {
++      const wrappedQueryResult = new QueryResult(this, nodeQueryResult);
++      queryResults.push(wrappedQueryResult);
++      if (!nodeQueryResult.hasNextQueryResult()) {
++        return wrappedQueryResult;
++      }
++      let currentQueryResult = nodeQueryResult;
++      while (currentQueryResult.hasNextQueryResult()) {
++        const nextNodeQueryResult = currentQueryResult.getNextQueryResultSync();
++        let nextQueryResult;
++        try {
++          nextQueryResult = new QueryResult(this, nextNodeQueryResult);
++        } catch (error) {
++          throw closeUnclaimedQueryResult(nextNodeQueryResult, error);
++        }
++        queryResults.push(nextQueryResult);
++        currentQueryResult = nextNodeQueryResult;
++      }
++      return queryResults;
++    } catch (error) {
++      if (queryResults.length === 0) {
++        throw closeUnclaimedQueryResult(nodeQueryResult, error);
++      }
++      throw closeUnclaimedQueryResults(queryResults, error);
++    }
+diff --git a/install.js b/install.js
+index cc11652..8a53e89 100644
+--- a/install.js
++++ b/install.js
+@@ -6,0 +7,3 @@ const process = require("process");
++const patchedConnection = fs.readFileSync(
++  path.join(__dirname, "connection.js")
++);
+@@ -217,0 +221 @@ for (const file of files) {
++fs.writeFileSync(path.join(__dirname, "connection.js"), patchedConnection);

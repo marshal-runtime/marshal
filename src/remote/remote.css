@@ -1,0 +1,909 @@
+:root[data-remote] {
+  color-scheme: dark;
+  --remote-height: 100dvh;
+}
+html[data-remote],
+html[data-remote] body,
+html[data-remote] #root {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+html[data-remote] body {
+  background: #101014;
+  color: #ececf1;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+.remote-connect {
+  box-sizing: border-box;
+  width: min(100%, 420px);
+  margin: 10dvh auto;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.remote-connect h1 {
+  font-size: 32px;
+  margin: 0;
+}
+.remote-connect p {
+  color: #a3a3b3;
+  line-height: 1.6;
+  margin: 0;
+}
+.remote-connect input {
+  background: #202028;
+  border: 1px solid #4d4d5d;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 16px;
+  color: white;
+  width: 100%;
+  box-sizing: border-box;
+}
+.remote-connect button,
+.remote-new,
+.remote-empty button {
+  border: 0;
+  border-radius: 12px;
+  background: #ddf5ca;
+  color: #1d3017;
+  padding: 14px 20px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.remote-shell {
+  display: flex;
+  flex-direction: column;
+  height: var(--remote-height);
+  background: var(--background, #101014);
+  color: var(--foreground, #eee);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+  box-sizing: border-box;
+}
+.remote-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border, #303039);
+  min-height: 64px;
+  flex-shrink: 0;
+}
+.remote-header > div {
+  flex: 1;
+  min-width: 0;
+}
+.remote-header strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+}
+.remote-header small {
+  display: block;
+  color: var(--muted-foreground, #aaa);
+  font-size: 11px;
+  margin-top: 3px;
+}
+.remote-header button,
+.remote-drawer-heading button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  border-radius: 10px;
+  font-size: 24px;
+  cursor: pointer;
+}
+.remote-chat {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+.remote-empty {
+  padding: 48px 24px;
+  text-align: center;
+}
+.remote-empty h1 {
+  font-size: 28px;
+  margin: 0 0 16px;
+}
+.remote-empty p {
+  color: var(--muted-foreground);
+  margin-bottom: 24px;
+}
+.remote-banner {
+  padding: 8px 14px;
+  background: #593f19;
+  color: #fff;
+  font-size: 13px;
+}
+.remote-banner button {
+  text-decoration: underline;
+  margin-left: 8px;
+}
+.remote-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: #0008;
+}
+.remote-drawer {
+  display: flex;
+  flex-direction: column;
+  width: min(88vw, 380px);
+  height: 100%;
+  box-sizing: border-box;
+  padding: calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right))
+    calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+  background: var(--background, #17171c);
+  box-shadow: 10px 0 60px #0005;
+}
+.remote-drawer-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.remote-drawer h2 {
+  font-size: 20px;
+  font-weight: 650;
+}
+.remote-drawer nav {
+  flex: 1;
+  overflow: auto;
+  margin-top: 16px;
+}
+.remote-drawer nav button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 12px;
+  border-radius: 12px;
+  margin-bottom: 4px;
+  min-height: 56px;
+}
+.remote-drawer nav button[aria-current="page"] {
+  background: var(--accent, #303038);
+}
+.remote-drawer nav strong,
+.remote-drawer nav small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.remote-drawer nav strong {
+  font-weight: 500;
+}
+.remote-drawer nav small {
+  color: var(--muted-foreground, #aaa);
+  font-size: 12px;
+  margin-top: 4px;
+}
+.remote-drawer-note {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  margin: 16px 0;
+}
+/* Taps on rows, cards and buttons must not start an iOS text selection; only message
+   text, code and form fields stay selectable (long-press to copy). */
+html[data-remote] body,
+html[data-remote] [data-testid="messages-container"] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+html[data-remote] [data-testid="message-text"],
+html[data-remote] pre,
+html[data-remote] code,
+html[data-remote] input,
+html[data-remote] textarea {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+html[data-remote] [contenteditable="true"] {
+  font-size: 16px !important;
+  min-height: 44px;
+  -webkit-user-select: text;
+  user-select: text;
+}
+html[data-remote] input,
+html[data-remote] textarea,
+html[data-remote] select {
+  font-size: 16px;
+}
+html[data-remote] [data-lexical-editor] {
+  max-height: 25dvh;
+  overflow-y: auto;
+}
+html[data-remote] button {
+  touch-action: manipulation;
+}
+/* iOS press feedback: controls dim and highlight under the finger. Size never
+   changes, so the click WebKit synthesizes still lands on the pressed control. */
+html[data-remote] [data-slot="button"] {
+  transition:
+    opacity 120ms ease-out,
+    background-color 120ms ease-out;
+}
+html[data-remote] [data-slot="button"]:active:not(:disabled) {
+  opacity: 0.6;
+}
+html[data-remote] [data-slot="button"]:active:not(:disabled),
+html[data-remote] [role="tab"]:active,
+html[data-remote] [role="menuitem"]:active {
+  background-color: var(--accent);
+}
+html[data-remote] pre {
+  max-width: 100%;
+  overflow: auto;
+}
+@media (max-width: 600px) {
+  html[data-remote]
+    [role="dialog"]:not(.remote-drawer):not(.remote-conversations):not(.remote-navigation):not(
+      [data-full-screen]
+    ) {
+    max-width: calc(100vw - 24px);
+  }
+  .remote-chat [data-testid="chat-input"] {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
+/* Keep the shared desktop controls comfortable to tap on the phone surface. */
+html[data-remote] [data-testid="permission-card"] button,
+html[data-remote] [data-testid="send-btn"],
+html[data-remote] [data-testid="stop-btn"],
+html[data-remote] [data-testid="compact-session-btn"],
+html[data-remote] [data-testid="options-popover"],
+html[data-remote] [data-testid="attachment-popover"] {
+  min-width: 44px;
+  min-height: 44px;
+}
+html[data-remote] [role="menuitem"],
+html[data-remote] [role="menuitemradio"],
+html[data-remote] [role="menuitemcheckbox"] {
+  min-height: 44px;
+}
+
+/* The keyboard changes the visual viewport without changing CSS vh on iOS. */
+html[data-remote] [data-testid="chat-composer-region"] {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 100%;
+}
+html[data-remote] [data-testid="chat-input"] {
+  flex-shrink: 0;
+}
+html[data-remote] [data-testid="permission-decision-tray"],
+html[data-remote] [data-testid="permission-decision-tray"] > div {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+html[data-remote] [data-testid="permission-decision-tray"] > div > :first-child {
+  flex-shrink: 0;
+}
+html[data-remote] [data-testid="permission-decision-list"] {
+  min-height: 0;
+  max-height: min(calc(var(--remote-height) * 0.42), 26rem);
+  overflow-y: auto;
+}
+
+/* The app is pinned to the visible viewport; only its inner lists scroll. */
+html[data-remote],
+html[data-remote] body {
+  position: fixed;
+  inset: 0;
+  overscroll-behavior: none;
+}
+html[data-remote] #root {
+  position: fixed;
+  top: var(--remote-top, 0px);
+  left: var(--remote-left, 0px);
+  width: var(--remote-width, 100%);
+  height: var(--remote-height, 100dvh);
+}
+html[data-remote] [hidden] {
+  display: none !important;
+}
+html[data-remote] [data-testid="messages-container"],
+.remote-conversation-list,
+.remote-connection-page {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.remote-conversations {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.remote-header h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 650;
+}
+.remote-online {
+  color: #36c58e;
+}
+.remote-conversation-tools {
+  display: flex;
+  gap: 12px;
+  padding: 18px 20px 12px;
+}
+.remote-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--muted);
+  border-radius: 24px;
+  padding: 0 16px;
+  min-width: 0;
+  flex: 1;
+}
+.remote-search span {
+  font-size: 26px;
+}
+.remote-search input {
+  background: transparent;
+  border: 0;
+  outline: 0;
+  min-width: 0;
+  width: 100%;
+  height: 48px;
+  color: inherit;
+}
+.remote-compose-new {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--foreground);
+  color: var(--background);
+  font-size: 30px;
+  flex-shrink: 0;
+}
+.remote-notifications {
+  margin: 8px 0 24px;
+}
+.remote-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  margin-top: 8px;
+  border: 1px solid var(--border, #303039);
+  border-radius: 14px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.remote-switch span:last-child {
+  flex-shrink: 0;
+  min-width: 48px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 13px;
+  background: var(--muted, #2a2a33);
+  color: var(--muted-foreground, #aaa);
+}
+.remote-switch[aria-checked="true"] span:last-child {
+  background: #ddf5ca;
+  color: #1d3017;
+}
+.remote-switch-sub {
+  min-height: 46px;
+  margin-left: 12px;
+  width: calc(100% - 12px);
+  font-size: 14px;
+}
+.remote-notifications-error {
+  color: #ff9c9c;
+}
+.remote-filter-chips {
+  display: flex;
+  gap: 8px;
+  padding: 0 20px 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+.remote-filter-chips::-webkit-scrollbar {
+  display: none;
+}
+.remote-filter-chips button {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 18px;
+  border: 1px solid var(--border, #303039);
+  background: transparent;
+  color: var(--muted-foreground, #aaa);
+  font: inherit;
+  font-size: 14px;
+}
+.remote-filter-chips button[aria-pressed="true"] {
+  background: var(--foreground, #eee);
+  border-color: var(--foreground, #eee);
+  color: var(--background, #101014);
+}
+.remote-conversation-list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px 20px 24px;
+}
+.remote-project-group {
+  margin-bottom: 24px;
+}
+.remote-project-group h2 {
+  font-size: 18px;
+  font-weight: 650;
+  padding: 10px 8px;
+}
+.remote-project-group button,
+.remote-project-link {
+  display: block;
+  width: 100%;
+  padding: 14px 12px;
+  min-height: 64px;
+  text-align: left;
+  border-radius: 12px;
+}
+.remote-project-group button[aria-current="page"],
+.remote-navigation button[aria-current="page"] {
+  background: var(--accent);
+}
+.remote-conversation-list strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.remote-conversation-list small {
+  display: block;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.remote-list-note {
+  padding: 12px;
+  color: var(--muted-foreground);
+}
+.remote-back-projects {
+  text-align: left;
+  margin: 0 20px;
+  min-height: 44px;
+  color: var(--muted-foreground);
+}
+.remote-navigation-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 70;
+  background: #0008;
+}
+.remote-navigation {
+  width: min(88%, 360px);
+  height: 100%;
+  background: var(--background);
+  padding: calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right))
+    calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+  overflow-y: auto;
+  box-shadow: 8px 0 40px #0004;
+}
+.remote-navigation nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 24px;
+}
+.remote-navigation nav button {
+  text-align: left;
+  min-height: 52px;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 17px;
+}
+.remote-host-label {
+  color: var(--muted-foreground);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.remote-connection-page {
+  padding: 20px;
+  overflow-y: auto;
+}
+.remote-connection-page h2 {
+  font-weight: 650;
+  font-size: 20px;
+  margin: 20px 0 12px;
+  overflow-wrap: anywhere;
+}
+.remote-connection-page p {
+  color: var(--muted-foreground);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+.remote-disconnect {
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  min-height: 44px;
+  border-radius: 12px;
+}
+.remote-connect {
+  max-height: 100%;
+  overflow-y: auto;
+  margin-top: 0;
+  padding-top: max(32px, env(safe-area-inset-top));
+}
+.remote-project-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.remote-project-heading h2 {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+}
+.remote-project-heading .remote-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 8px;
+  font-size: 18px;
+  font-weight: 650;
+}
+.remote-group-toggle small {
+  display: inline;
+  font-weight: 400;
+  margin: 0 0 0 4px;
+}
+.remote-project-heading .remote-project-create {
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  font-size: 26px;
+}
+.remote-session-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.remote-session-row .remote-session-open {
+  min-width: 0;
+  flex: 1;
+  width: auto;
+}
+.remote-session-row .remote-session-pin {
+  flex: none;
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+  font-size: 22px;
+  color: var(--muted-foreground);
+}
+.remote-session-pin[aria-pressed="true"] {
+  color: var(--foreground);
+}
+.remote-composer-project {
+  display: flex;
+  align-items: center;
+}
+.remote-composer-project button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  max-width: 100%;
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 14px;
+  color: var(--muted-foreground);
+}
+.remote-composer-project button > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.remote-project-chevrons {
+  font-size: 13px;
+  line-height: 8px;
+}
+/* During a permission decision the project is already fixed; prioritize its
+   decision controls and the reply composer in a short keyboard viewport. */
+.remote-chat:has([data-testid="permission-decision-tray"]) [data-testid="chat-composer-header"] {
+  display: none;
+}
+
+/* Phone chrome shares one compact header and a bottom-docked composer. */
+.remote-header {
+  min-height: 56px;
+  padding: 4px 8px;
+  gap: 4px;
+  border-bottom: 0;
+}
+.remote-header small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.remote-header button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.remote-header > .remote-header-actions {
+  flex: none;
+}
+.remote-header-actions:empty {
+  display: none;
+}
+.remote-header-actions [data-testid="timeline-filter-trigger"] {
+  border: 0;
+  padding: 8px;
+  background: transparent;
+}
+/* The visible viewport already ends above Safari/keyboard chrome. Keep the
+   chat composer flush with that edge, even when iOS resizes both viewports. */
+html[data-remote] .remote-shell:has(> .remote-chat:not([hidden])) {
+  padding-bottom: 0;
+}
+html[data-remote] [data-testid="chat-input"] {
+  padding: 4px 10px 0;
+  gap: 6px;
+}
+html[data-remote] [data-testid="chat-composer-surface"] {
+  border-radius: 24px;
+  border-color: var(--border);
+  padding: 4px 8px;
+  gap: 0;
+}
+html[data-remote] [data-testid="chat-composer-surface"]:focus-within {
+  border-color: var(--border);
+}
+html[data-remote] [data-testid="chat-composer-surface"] > .relative {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+html[data-remote] [data-lexical-editor] {
+  max-height: min(120px, calc(var(--remote-height) * 0.25));
+}
+.remote-composer-project button {
+  gap: 6px;
+  padding: 0 4px;
+  min-height: 44px;
+  font-size: 12px;
+}
+.remote-composer-project button > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.remote-composer-project button > svg {
+  flex-shrink: 0;
+}
+.remote-composer-project button:disabled {
+  min-height: 24px;
+}
+.remote-session-open strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.remote-session-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.remote-running {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  border: 2px solid var(--muted-foreground);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: remote-spin 1s linear infinite;
+}
+.remote-unread {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #8ebaff;
+  flex: none;
+}
+@keyframes remote-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .remote-running {
+    animation: none;
+  }
+}
+html[data-remote] [data-context-picker-menu] {
+  max-height: var(--remote-picker-height, 240px);
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+}
+html[data-remote] [data-context-picker-menu] [cmdk-root] {
+  height: auto;
+  min-height: 0;
+}
+html[data-remote] [data-context-picker-menu] [cmdk-list] {
+  height: auto;
+  max-height: var(--remote-picker-list-height, 196px);
+}
+html[data-remote] [data-context-picker-menu] [role="tablist"] {
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+html[data-remote] [data-context-picker-menu] [role="tab"] {
+  min-height: 44px;
+  flex-shrink: 0;
+}
+html[data-remote] [data-context-picker-menu] [role="option"] {
+  min-height: 52px;
+}
+html[data-remote] [data-context-picker-menu] [role="option"] .truncate {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.remote-project-heading .remote-project-create {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.remote-group-toggle > svg {
+  flex-shrink: 0;
+}
+
+/* Let phone replies use the reading width instead of an avatar column. */
+html[data-remote] [data-testid="messages-container"] {
+  padding: 12px;
+  scrollbar-gutter: auto;
+}
+html[data-remote] [data-testid="message-assistant"] {
+  width: 100%;
+  max-width: 100%;
+}
+html[data-remote] .bg-message-assistant-bg {
+  padding-inline: 0;
+}
+html[data-remote] [data-testid="live-turn"] {
+  margin-left: 0;
+}
+
+/* Existing conversations need only a reply line until the composer is focused
+   (composerFocus.ts sets data-composer-open, clearing it only after a tap lands).
+   Keep the real editor and send/stop control mounted so drafts and actions survive. */
+html[data-remote] [data-mobile-collapsible]:not([data-composer-open]) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: center;
+  column-gap: 8px;
+}
+html[data-remote]
+  [data-mobile-collapsible]:not([data-composer-open])
+  [data-testid="chat-composer-header"],
+html[data-remote]
+  [data-mobile-collapsible]:not([data-composer-open])
+  [data-testid="chat-composer-toolbar"]
+  > :first-child {
+  display: none;
+}
+html[data-remote]
+  [data-mobile-collapsible]:not([data-composer-open])
+  [data-testid="chat-composer-toolbar"] {
+  display: contents;
+}
+html[data-remote]
+  [data-mobile-collapsible]:not([data-composer-open])
+  [data-testid="chat-composer-toolbar"]
+  > :last-child {
+  grid-column: 2;
+  grid-row: 1;
+}
+html[data-remote]
+  [data-mobile-collapsible]:not([data-composer-open])
+  [data-testid="chat-composer-toolbar"]
+  > :last-child
+  > :not([data-testid="send-btn"]):not([data-testid="stop-btn"]) {
+  display: none;
+}
+html[data-remote]
+  [data-mobile-collapsible]:not([data-composer-open])
+  [data-testid="chat-composer-editor"] {
+  grid-column: 1;
+  grid-row: 1;
+  max-height: 44px;
+  overflow: hidden;
+}
+html[data-remote] [data-mobile-collapsible]:not([data-composer-open]) [contenteditable="true"] {
+  min-height: 24px;
+  max-height: 24px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* Extension apps (runtime UI) */
+.remote-app-link {
+  display: block;
+  width: 100%;
+  padding: 14px 12px;
+  min-height: 64px;
+  text-align: left;
+  border-radius: 12px;
+}
+.remote-app-link strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.remote-app-pane {
+  position: fixed;
+  inset: var(--remote-top, 0) auto auto var(--remote-left, 0);
+  width: var(--remote-width, 100vw);
+  height: var(--remote-height, 100dvh);
+  display: flex;
+  flex-direction: column;
+  background: var(--background-base, var(--background));
+  z-index: 30;
+}
+.remote-app-pane > .remote-header {
+  flex: none;
+}
+.remote-app-frame {
+  flex: 1;
+  min-height: 0;
+}
+.remote-source-fallback {
+  font:
+    12px/1.5 ui-monospace,
+    monospace;
+  white-space: pre-wrap;
+  overflow: auto;
+  padding: 12px;
+}
+
+/* While the keyboard is up the sheet folds to its tab strip, so the chat and composer keep the screen. */
+html[data-keyboard] [data-phone-sheet] {
+  /* Beats the detent height the sheet sets inline. */
+  height: auto !important;
+}
+html[data-keyboard] [data-phone-sheet-body] {
+  display: none;
+}

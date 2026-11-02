@@ -1,0 +1,203 @@
+/* Marshal theme for the session dock: dockview variables mapped onto Marshal tokens.
+   The accent is the brand violet (--primary is near-black/near-white, which read flat). */
+.dockview-theme-marshal {
+  --dock-accent: var(--brand-action);
+  --dock-accent-soft: var(--brand-subtle);
+  --dock-accent-line: var(--brand-stroke);
+  --dock-accent-edge: var(--brand-border);
+  --dv-paneview-active-outline-color: var(--dock-accent);
+  --dv-tabs-and-actions-container-font-size: 12px;
+  --dv-tabs-and-actions-container-height: 36px;
+  --dv-tabs-and-actions-container-background-color: var(--background);
+  --dv-group-view-background-color: var(--card);
+  --dv-activegroup-visiblepanel-tab-background-color: var(--card);
+  --dv-activegroup-hiddenpanel-tab-background-color: transparent;
+  --dv-inactivegroup-visiblepanel-tab-background-color: var(--card);
+  --dv-inactivegroup-hiddenpanel-tab-background-color: transparent;
+  --dv-activegroup-visiblepanel-tab-color: var(--foreground);
+  --dv-activegroup-hiddenpanel-tab-color: var(--muted-foreground);
+  --dv-inactivegroup-visiblepanel-tab-color: var(--foreground);
+  --dv-inactivegroup-hiddenpanel-tab-color: var(--muted-foreground);
+  --dv-tab-divider-color: transparent;
+  --dv-separator-border: var(--border);
+  --dv-sash-color: transparent;
+  --dv-active-sash-color: var(--dock-accent);
+  --dv-active-sash-transition-duration: 0.1s;
+  --dv-active-sash-transition-delay: 0.15s;
+  --dv-drag-over-background-color: color-mix(in oklab, var(--dock-accent) 22%, transparent);
+  --dv-drag-over-border-color: var(--dock-accent);
+  --dv-drag-over-border: 2px solid var(--dock-accent);
+  --dv-edge-dock-indicator-color: var(--dock-accent);
+  --dv-icon-hover-background-color: color-mix(in oklab, var(--dock-accent) 12%, transparent);
+  --dv-tabs-container-scrollbar-color: var(--border);
+  --dv-scrollbar-background-color: var(--border);
+  --dv-context-menu-background-color: var(--popover);
+  --dv-context-menu-color: var(--foreground);
+  --dv-floating-box-shadow:
+    0 18px 48px color-mix(in oklab, var(--dock-accent) 24%, transparent),
+    0 2px 8px rgb(0 0 0 / 0.12);
+  --dv-floating-border: 1px solid var(--dock-accent-edge);
+  --dv-floating-group-border: 1px solid var(--dock-accent-edge);
+  --dv-floating-titlebar-height: 16px;
+  --dv-floating-titlebar-background-color: var(--dock-accent-soft);
+  --dv-floating-titlebar-border-bottom: 1px solid var(--dock-accent-edge);
+  --dv-floating-group-dragging-opacity: 0.6;
+  --dv-overlay-z-index: 60;
+  --dv-tab-font-size: inherit;
+  --dv-border-radius: 8px;
+  --dv-tab-margin: 0;
+  --dv-spacing-padding: 0px;
+  --dv-tab-border-radius: 0px;
+  --dv-sash-border-radius: 0px;
+  --dv-dropdown-border-radius: 8px;
+  --dv-tab-close-icon-size: inherit;
+  --dv-transition-duration: 120ms;
+  color: var(--foreground);
+  background-color: var(--background);
+}
+
+/* The chat group's strip stays quiet: a single Chat tab needs no chrome. */
+.dockview-theme-marshal .dv-tabs-and-actions-container {
+  border-bottom: 1px solid var(--border);
+}
+
+.dockview-theme-marshal .dv-tab {
+  padding: 0;
+  transition:
+    background-color 120ms ease-out,
+    color 120ms ease-out,
+    box-shadow 120ms ease-out;
+}
+
+.dockview-theme-marshal .dv-tab:hover {
+  background-color: color-mix(in oklab, var(--dock-accent) 8%, transparent);
+}
+
+/* The focused group's selected tab carries the accent; other groups keep a softer mark. */
+.dockview-theme-marshal .dv-tab.dv-active-tab {
+  box-shadow: inset 0 -2px 0 var(--dock-accent-edge);
+}
+
+.dockview-theme-marshal .dv-active-group .dv-tab.dv-active-tab {
+  color: var(--brand-badge-text);
+  background-image: linear-gradient(
+    to top,
+    color-mix(in oklab, var(--dock-accent) 14%, transparent),
+    transparent 75%
+  );
+  box-shadow: inset 0 -2px 0 var(--dock-accent);
+}
+
+.dockview-theme-marshal .dv-active-group > .dv-tabs-and-actions-container {
+  background-color: color-mix(in oklab, var(--dock-accent-soft) 60%, var(--background));
+}
+
+.dockview-theme-marshal .dv-resize-container-dragging {
+  outline: 2px solid var(--dock-accent);
+}
+
+/* The floating window's title bar is its move handle; a grip makes that visible. */
+.dockview-theme-marshal .dv-floating-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+}
+
+.dockview-theme-marshal .dv-floating-titlebar::after {
+  content: "";
+  width: 32px;
+  height: 4px;
+  border-radius: 999px;
+  background-color: var(--dock-accent-line);
+  transition: background-color 120ms ease-out;
+}
+
+.dockview-theme-marshal .dv-floating-titlebar:hover::after {
+  background-color: var(--dock-accent);
+}
+
+.dockview-theme-marshal .dv-sash {
+  z-index: 5;
+}
+
+/* Dockview's floating-window grab areas are 4px (corners 4×4), which a mouse barely finds.
+   The view content layer covers the window's inside, so they sit just outside its edge. */
+.dockview-theme-marshal .dv-resize-container .dv-resize-handle-top,
+.dockview-theme-marshal .dv-resize-container .dv-resize-handle-bottom {
+  height: 10px;
+  width: calc(100% - 4px);
+  left: 2px;
+}
+
+.dockview-theme-marshal .dv-resize-container .dv-resize-handle-top {
+  top: -9px;
+}
+
+.dockview-theme-marshal .dv-resize-container .dv-resize-handle-bottom {
+  bottom: -9px;
+}
+
+.dockview-theme-marshal .dv-resize-container .dv-resize-handle-left,
+.dockview-theme-marshal .dv-resize-container .dv-resize-handle-right {
+  width: 10px;
+  height: calc(100% - 4px);
+  top: 2px;
+}
+
+.dockview-theme-marshal .dv-resize-container .dv-resize-handle-left {
+  left: -9px;
+}
+
+.dockview-theme-marshal .dv-resize-container .dv-resize-handle-right {
+  right: -9px;
+}
+
+.dockview-theme-marshal .dv-resize-container .dv-resize-handle-topleft,
+.dockview-theme-marshal .dv-resize-container .dv-resize-handle-topright,
+.dockview-theme-marshal .dv-resize-container .dv-resize-handle-bottomleft,
+.dockview-theme-marshal .dv-resize-container .dv-resize-handle-bottomright {
+  width: 16px;
+  height: 16px;
+}
+
+.dockview-theme-marshal .dv-resize-container .dv-resize-handle-topleft {
+  top: -14px;
+  left: -14px;
+}
+
+.dockview-theme-marshal .dv-resize-container .dv-resize-handle-topright {
+  top: -14px;
+  right: -14px;
+}
+
+.dockview-theme-marshal .dv-resize-container .dv-resize-handle-bottomleft {
+  bottom: -14px;
+  left: -14px;
+}
+
+.dockview-theme-marshal .dv-resize-container .dv-resize-handle-bottomright {
+  bottom: -14px;
+  right: -14px;
+}
+
+/* Dockview sizes the floating layer to the centre grid (the chat column once side or bottom
+   docks open), which caps a floating window's resize at the chat column. Marshal has no left or
+   top docks, so the grid and the dock share a top-left corner and window positions don't shift. */
+.dockview-theme-marshal .dv-floating-overlay-host {
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* While a tab is dragged, those bands would swallow drops aimed just beside a floating window. */
+[data-dock-dragging] .dockview-theme-marshal .dv-resize-container [class*="dv-resize-handle-"] {
+  pointer-events: none;
+}
+
+/* A maximized tab is a floating window that fills the dock area: no window chrome. */
+.dockview-theme-marshal .session-dock-maximized {
+  border-radius: 0;
+  box-shadow: none;
+}

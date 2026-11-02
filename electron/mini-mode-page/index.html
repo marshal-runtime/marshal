@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src data: blob:;"
+    />
+    <title>Marshal Mini Mode</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="shell" id="mini-shell">
+      <div class="notification-toast" id="notification-toast" hidden>
+        <div class="notification-header">
+          <div class="notification-icon" id="notification-icon"></div>
+          <div class="notification-title" id="notification-title"></div>
+          <span class="notification-badge" id="notification-badge"></span>
+          <button
+            class="notification-dismiss"
+            id="notification-dismiss"
+            type="button"
+            aria-label="Dismiss"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="notification-body" id="notification-body">
+          <span class="notification-read-more" id="notification-read-more" hidden> Read more…</span>
+        </div>
+      </div>
+      <div class="approval-card" id="approval-card" hidden>
+        <div class="approval-header">
+          <div class="approval-meta">
+            <div class="kind" id="permission-kind">Approval</div>
+            <div class="count" id="permission-count"></div>
+            <button
+              class="approval-dismiss"
+              id="approval-dismiss"
+              type="button"
+              aria-label="Dismiss approval"
+            >
+              ✕
+            </button>
+          </div>
+          <div class="title-stack">
+            <div class="title" id="permission-title">Waiting for approval</div>
+            <div class="message" id="permission-message"></div>
+          </div>
+        </div>
+        <div class="detail-shell">
+          <div class="detail-toolbar">
+            <div class="detail-label">Command details</div>
+            <button type="button" class="detail-expand" id="permission-detail-expand">
+              Expand
+            </button>
+          </div>
+          <pre id="permission-detail"></pre>
+        </div>
+        <div class="actions" id="permission-actions"></div>
+        <div class="detail-overlay" id="permission-detail-overlay" hidden>
+          <div class="detail-overlay-header">
+            <div class="detail-overlay-title">Full command details</div>
+            <button type="button" class="detail-overlay-close" id="permission-detail-close">
+              Close
+            </button>
+          </div>
+          <pre id="permission-detail-full"></pre>
+        </div>
+      </div>
+      <div class="mini-anchor">
+        <div class="wrapper">
+          <button class="mini-button" id="mini-button" type="button" aria-label="Show Marshal">
+            <img id="mini-icon" alt="" />
+            <span class="fallback" id="mini-fallback" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

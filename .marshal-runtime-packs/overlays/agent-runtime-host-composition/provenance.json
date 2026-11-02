@@ -1,0 +1,16 @@
+{
+  "package": "@marshal/agent-runtime-host",
+  "baseArchive": "marshal-agent-runtime-host-0.1.0-marshal-host-7.tgz",
+  "baseArchiveSha256": "a7856e64576054c0b45d84882a75f3e752e261145fea4198ea2d36102de78ad6",
+  "source": {
+    "repository": "marshal-agent-runtime",
+    "commit": "d33943a0683be76b671f17c5a848c837fa42e2d2"
+  },
+  "files": [
+    "src/compositionCatalog.ts",
+    "dist/compositionCatalog.js",
+    "dist/compositionCatalog.js.map",
+    "dist/compositionCatalog.d.ts.map"
+  ],
+  "rationale": "Bound the runtime-composition catalog entry to an identity projection (search corpus deduplicated, no inline declarations/method schemas; full document unchanged and served via the entry's resource_read action). The base archive's other bytes are retained dirty-source content that no clean commit reproduces (e.g. dist/nativeExtensions.js predates its own src) and must not be rebuilt. compositionCatalog is safe to overlay from source because the base archive's copy is byte-identical to a clean build of the pre-patch source."
+}

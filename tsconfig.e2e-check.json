@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "noEmit": true
+  },
+  "include": ["e2e/runtime-acceptance/ui-scenarios.ts", "e2e/runtime-acceptance/harness.ts", "e2e/marshal-fixtures.ts", "e2e/marshal-seed-data.ts", "common/**/*.ts", "electron/**/*.ts"],
+  "references": []
+}

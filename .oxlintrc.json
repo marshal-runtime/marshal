@@ -1,0 +1,419 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "env": {
+    "builtin": true
+  },
+  "settings": {
+    "react": {
+      "version": "19.2"
+    },
+    "better-tailwindcss": {
+      "entryPoint": "src/index.css"
+    }
+  },
+  "ignorePatterns": [
+    "dist/",
+    "dist-electron/",
+    "dist-ssr/",
+    "node_modules/",
+    "sidecar/",
+    "**/*.cjs",
+    "scripts/",
+    "bundled-skills/",
+    "first-party-skills/",
+    "release/",
+    ".claude/",
+    "e2e-real/",
+    "packages/",
+    "electron/backend/cloud/client.test.ts",
+    "electron/backend/cloud/integration.test.ts",
+    "electron/backend/cloud/workspace.test.ts"
+  ],
+  "rules": {
+    // Nursery rules (not in any category yet)
+    "getter-return": "error",
+    "no-unreachable": "error",
+    // Pedantic rules (not in correctness)
+    "no-array-constructor": "error",
+    "no-case-declarations": "error",
+    "no-fallthrough": "error",
+    "no-prototype-builtins": "error",
+    "no-redeclare": "error",
+    "@typescript-eslint/ban-ts-comment": "error",
+    "@typescript-eslint/no-unsafe-function-type": "error",
+    // Restriction rules (not in correctness)
+    "no-empty": "error",
+    "no-regex-spaces": "error",
+    "@typescript-eslint/no-empty-object-type": "error",
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-namespace": "error",
+    "@typescript-eslint/no-require-imports": "error",
+    // Suspicious rules (not in correctness)
+    "no-unexpected-multiline": "error",
+    "@typescript-eslint/no-unnecessary-type-constraint": "error",
+    // Type-aware rules (require --type-aware flag)
+    "@typescript-eslint/no-unnecessary-type-assertion": "error",
+    "@typescript-eslint/no-unsafe-type-assertion": "error",
+    "@typescript-eslint/unbound-method": "off",
+    // Security rules — SF-2 (output sanitization) + SF-4 (safe deserializers)
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-new-func": "error",
+    "no-script-url": "error",
+    // Auto-enabled in newer oxlint. Disabled because the codebase uses
+    // `_`/`__` prefixes deliberately for `@internal` test escape hatches,
+    // window-mounted test hooks (`__triggerCrash`, `__test_with`), Node
+    // globals (`__dirname`), and private-by-convention fields on backend
+    // classes (e.g. `_sessions`, `_tools`). Style-only rule, no real-bug
+    // coverage. Re-enable later in a focused cleanup PR if desired.
+    "no-underscore-dangle": "off",
+    // Structured logging — use createLogger() from common/marshal-logger.ts instead of bare console calls.
+    // Unmigrated files are exempted below; remove each exemption as you migrate the file (#931).
+    "no-console": "error"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
+      "rules": {
+        "constructor-super": "off",
+        "no-class-assign": "off",
+        "no-const-assign": "off",
+        "no-dupe-class-members": "off",
+        "no-dupe-keys": "off",
+        "no-func-assign": "off",
+        "no-import-assign": "off",
+        "no-new-native-nonconstructor": "off",
+        "no-obj-calls": "off",
+        "no-redeclare": "off",
+        "no-setter-return": "off",
+        "no-this-before-super": "off",
+        "no-unsafe-negation": "off",
+        "no-var": "error",
+        "no-with": "off",
+        "prefer-const": "error",
+        "prefer-rest-params": "error",
+        "prefer-spread": "error"
+      }
+    },
+    {
+      "files": ["**/*.{ts,tsx}"],
+      "rules": {
+        // Correctness rules handled by category — only overrides needed:
+        "react/no-unsafe": "off",
+        "react/react-in-jsx-scope": "off",
+        // React Compiler correctness rules (via jsPlugin) — these route through
+        // the real `eslint-plugin-react-hooks` JS plugin (loaded under the
+        // `react-compiler` alias below), which has full upstream coverage.
+        // The native oxlint port `react-hooks/exhaustive-deps` and
+        // `react-hooks/rules-of-hooks` undercatch (e.g. the useEffectEvent
+        // passed-down check), so we use the JS plugin instead.
+        "react-compiler/exhaustive-deps": "warn",
+        "react-compiler/rules-of-hooks": "error",
+        "react-compiler/purity": "error",
+        "react-compiler/set-state-in-render": "error",
+        "react-compiler/set-state-in-effect": "error",
+        "react-compiler/refs": "error",
+        "react-compiler/immutability": "error",
+        "react-compiler/error-boundaries": "error",
+        "react-compiler/globals": "warn",
+        // Non-correctness rules
+        // SF-2: warn (not error) — three legitimate DOMPurify-sanitized uses are suppressed inline
+        "react/no-danger": "warn",
+        "react/only-export-components": [
+          "warn",
+          {
+            "allowConstantExport": true
+          }
+        ]
+      },
+      "jsPlugins": [{ "name": "react-compiler", "specifier": "eslint-plugin-react-hooks" }],
+      "plugins": ["react"]
+    },
+    {
+      "files": ["src/components/ui/**/*.tsx"],
+      "plugins": ["react"],
+      "rules": {
+        "react/only-export-components": "off"
+      }
+    },
+    {
+      "files": ["**/*.d.ts"],
+      "rules": {
+        "no-unused-vars": "off"
+      }
+    },
+    {
+      "files": ["electron/**/*.ts"],
+      "env": {
+        "node": true
+      }
+    },
+    {
+      "files": ["mcp/**/*.ts"],
+      "env": {
+        "node": true
+      },
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["electron/**/*.ts"],
+      "rules": {
+        "sf4/no-bare-json-parse": "error"
+      },
+      "jsPlugins": [{ "name": "sf4", "specifier": "./eslint-plugins/marshal-sf4.js" }]
+    },
+    {
+      "files": [
+        "electron/**/*.test.ts",
+        "electron/testing/harness/**/*.ts",
+        "electron/**/test-helpers/**/*.ts",
+        "electron/**/test-helpers.ts",
+        "electron/safe-json.ts"
+      ],
+      "rules": {
+        "sf4/no-bare-json-parse": "off"
+      }
+    },
+    {
+      "files": ["src/**/*.{ts,tsx}"],
+      "env": {
+        "browser": true
+      },
+      "rules": {
+        "better-tailwindcss/enforce-consistent-class-order": "off",
+        "better-tailwindcss/enforce-consistent-line-wrapping": "off",
+        "better-tailwindcss/no-deprecated-classes": "warn",
+        "better-tailwindcss/no-duplicate-classes": "warn",
+        "better-tailwindcss/no-unnecessary-whitespace": "off",
+        "better-tailwindcss/enforce-canonical-classes": "warn",
+        "better-tailwindcss/no-conflicting-classes": "error",
+        "better-tailwindcss/no-unknown-classes": [
+          "warn",
+          {
+            "ignore": [
+              "md-seg-*",
+              "md-callout*",
+              "md-custom-editor",
+              "language-*",
+              "md-it-drop-row-target"
+            ]
+          }
+        ],
+        "better-tailwindcss/enforce-consistent-important-position": "warn",
+        "better-tailwindcss/enforce-consistent-variable-syntax": "warn",
+        "better-tailwindcss/enforce-shorthand-classes": "warn"
+      },
+      "jsPlugins": ["eslint-plugin-better-tailwindcss"]
+    },
+    {
+      "files": ["src/**/*.{ts,tsx}"],
+      "rules": {
+        "@tanstack/query/exhaustive-deps": "error",
+        "@tanstack/query/no-rest-destructuring": "warn",
+        "@tanstack/query/stable-query-client": "error"
+      },
+      "jsPlugins": ["@tanstack/eslint-plugin-query"]
+    },
+    {
+      "files": ["src/**/*.test.{ts,tsx}", "electron/**/*.test.ts", "common/**/*.test.ts"],
+      "rules": {
+        // Correctness rules handled by category — only custom config needed:
+        "vitest/valid-expect": ["error", { "maxArgs": 2 }],
+        "vitest/no-disabled-tests": "warn",
+        "vitest/require-mock-type-parameters": "error",
+        "@typescript-eslint/no-unsafe-type-assertion": "error"
+      },
+      "plugins": ["vitest"]
+    },
+    {
+      "files": ["src/**/*.test.{ts,tsx}"],
+      "rules": {
+        "testing-library/await-async-events": [
+          "error",
+          {
+            "eventModule": "userEvent"
+          }
+        ],
+        "testing-library/await-async-queries": "error",
+        "testing-library/await-async-utils": "error",
+        "testing-library/no-await-sync-events": [
+          "error",
+          {
+            "eventModules": ["fire-event"]
+          }
+        ],
+        "testing-library/no-await-sync-queries": "error",
+        "testing-library/no-container": "error",
+        "testing-library/no-debugging-utils": "warn",
+        "testing-library/no-dom-import": ["error", "react"],
+        "testing-library/no-global-regexp-flag-in-query": "error",
+        "testing-library/no-manual-cleanup": "error",
+        "testing-library/no-node-access": "error",
+        "testing-library/no-promise-in-fire-event": "error",
+        "testing-library/no-render-in-lifecycle": "error",
+        "testing-library/no-unnecessary-act": "error",
+        "testing-library/no-wait-for-multiple-assertions": "error",
+        "testing-library/no-wait-for-side-effects": "error",
+        "testing-library/no-wait-for-snapshot": "error",
+        "testing-library/prefer-find-by": "error",
+        "testing-library/prefer-presence-queries": "error",
+        "testing-library/prefer-query-by-disappearance": "error",
+        "testing-library/prefer-screen-queries": "error",
+        "testing-library/render-result-naming-convention": "error",
+        "testing-library/prefer-user-event": [
+          "error",
+          {
+            "allowedMethods": ["error", "blur", "contextMenu", "paste"]
+          }
+        ],
+        "testing-library/prefer-user-event-setup": "error"
+      },
+      "jsPlugins": ["eslint-plugin-testing-library"]
+    },
+    {
+      "files": ["e2e/**/*.ts"],
+      "rules": {
+        "no-empty-pattern": "off",
+        "playwright/consistent-spacing-between-blocks": "warn",
+        "playwright/expect-expect": "warn",
+        "playwright/max-nested-describe": "warn",
+        "playwright/missing-playwright-await": "error",
+        "playwright/no-conditional-expect": "warn",
+        "playwright/no-conditional-in-test": "warn",
+        "playwright/no-duplicate-hooks": "warn",
+        "playwright/no-duplicate-slow": "warn",
+        "playwright/no-element-handle": "warn",
+        "playwright/no-eval": "warn",
+        "playwright/no-focused-test": "error",
+        "playwright/no-force-option": "warn",
+        "playwright/no-nested-step": "warn",
+        "playwright/no-networkidle": "error",
+        "playwright/no-page-pause": "warn",
+        "playwright/no-skipped-test": "warn",
+        "playwright/no-standalone-expect": "error",
+        "playwright/no-unsafe-references": "error",
+        "playwright/no-unused-locators": "error",
+        "playwright/no-useless-await": "warn",
+        "playwright/no-useless-not": "warn",
+        "playwright/no-wait-for-navigation": "error",
+        "playwright/no-wait-for-selector": "warn",
+        "playwright/no-wait-for-timeout": "warn",
+        "playwright/prefer-hooks-in-order": "warn",
+        "playwright/prefer-hooks-on-top": "warn",
+        "playwright/prefer-locator": "warn",
+        "playwright/prefer-to-have-count": "warn",
+        "playwright/prefer-to-have-length": "warn",
+        "playwright/prefer-web-first-assertions": "error",
+        "playwright/valid-describe-callback": "error",
+        "playwright/valid-expect": "error",
+        "playwright/valid-expect-in-promise": "error",
+        "playwright/valid-test-tags": "error",
+        "playwright/valid-title": "error",
+        "react-hooks/rules-of-hooks": "off",
+        "react-compiler/rules-of-hooks": "off"
+      },
+      "jsPlugins": ["eslint-plugin-playwright"],
+      "plugins": ["react"],
+      "env": {
+        "node": true
+      }
+    },
+    {
+      "files": ["e2e/chat.marshal.test.ts"],
+      "rules": {
+        "playwright/no-wait-for-timeout": "off"
+      },
+      "jsPlugins": ["eslint-plugin-playwright"]
+    },
+    {
+      "files": ["common/marshal-logger.ts", "electron/mini-mode-page/**"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["**/*.test.*", "e2e/**"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["electron/sessions.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["./backend/gateway/**", "./backend/gateway"],
+                "message": "sessions.ts is shared — no gateway imports. Move logic into backend/gateway/."
+              },
+              {
+                "group": ["./backend/copilot/**", "./backend/copilot"],
+                "message": "sessions.ts is shared — no copilot imports. Move logic into backend/copilot/."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["electron/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["**/update-progress"],
+                "message": "Import spawnUpdateProgress only via electron/updater.ts (verifyAndLaunch). Direct imports bypass signature verification (#2379)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["electron/updater.ts", "electron/update-progress.test.ts"],
+      "rules": {
+        // updater.ts is the canonical chokepoint that legitimately imports
+        // update-progress (via verifyAndLaunch); the test file imports the
+        // module under test. Per-pattern "off" toggles aren't supported by
+        // oxlint, so we disable the whole rule for these two files — safe
+        // because neither file has reason to import backend/{copilot,gateway},
+        // the only OTHER patterns the rule guards (#2379).
+        //
+        // Forward-pointer: if the backend/{copilot,gateway} no-restricted-imports
+        // rule is ever widened from electron/sessions.ts to electron/**/*.ts,
+        // re-scope this override so updater.ts doesn't silently regain the
+        // ability to import backend internals.
+        "no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": ["electron/**/*.ts"],
+      "rules": {
+        "ipc-bridge/no-bare-ipc-handle": "error"
+      },
+      "jsPlugins": [{ "name": "ipc-bridge", "specifier": "./eslint-plugins/marshal-ipc-bridge.js" }]
+    },
+    {
+      "files": ["electron/ipc/ipc-handle.ts", "electron/main.ts", "electron/**/*.test.ts"],
+      "rules": {
+        // ipc-handle.ts is the canonical wrapper that legitimately calls
+        // ipcMain.handle. main.ts hosts the two dev:* registrations that
+        // bypass the wrapper and carry explicit assertMainFrame() calls.
+        // Tests mock ipcMain.handle to capture wrappers.
+        "ipc-bridge/no-bare-ipc-handle": "off"
+      }
+    }
+  ]
+}

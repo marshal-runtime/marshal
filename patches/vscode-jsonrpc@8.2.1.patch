@@ -1,0 +1,20 @@
+X-Marshal-Patch-Owner: batch15
+diff --git a/package.json b/package.json
+index d0080b2ad03f6471915c5527bfd11debbbffeefa..beaab3d3b2a8349ab7b02d85a5f27643b2469140 100644
+--- a/package.json
++++ b/package.json
+@@ -16,6 +16,14 @@
+ 		"node": ">=14.0.0"
+ 	},
+ 	"main": "./lib/node/main.js",
++	"exports": {
++		".": { "require": "./lib/node/main.js", "default": "./lib/node/main.js" },
++		"./node": { "require": "./node.js", "default": "./node.js" },
++		"./node.js": { "require": "./node.js", "default": "./node.js" },
++		"./browser": { "require": "./browser.js", "default": "./browser.js" },
++		"./browser.js": { "require": "./browser.js", "default": "./browser.js" },
++		"./lib/*": "./lib/*"
++	},
+ 	"browser": {
+ 		"./lib/node/main.js": "./lib/browser/main.js"
+ 	},

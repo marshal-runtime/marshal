@@ -1,0 +1,964 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "streamdown/styles.css";
+@source "../node_modules/streamdown/dist/*.js";
+@source "./plugins/*.ts";
+@custom-variant dark (&:is([data-theme="dark"] *));
+
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/Geist-Italic-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/fonts/GeistMono-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme inline {
+  /* Figma tokens NOT covered by shadcn's semantic vars.
+     Uses CSS vars so values switch with dark mode. */
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-foreground-primary-hover: var(--foreground-primary-hover);
+  --color-bg-disabled: var(--bg-disabled);
+  --color-border-loud: var(--border-loud);
+  --color-warning-primary: var(--warning-primary);
+  --color-brand-subtle: var(--brand-subtle);
+  --color-brand-stroke: var(--brand-stroke);
+  --color-brand-border: var(--brand-border);
+  --color-active-subtle: var(--bg-active-subtle);
+  /* Brand action (Figma: background-brand-heavy) */
+  --color-brand-action: var(--brand-action);
+  --color-brand-action-hover: var(--brand-action-hover);
+  --color-brand-action-fg: var(--brand-action-fg);
+  /* Neutral heavy (Figma: background-neutral-heavy — used by New chat + Stop buttons).
+     Foreground reuses --brand-action-fg; the two tokens share values in both modes. */
+  --color-neutral-heavy: var(--neutral-heavy);
+  --color-neutral-heavy-hover: var(--neutral-heavy-hover);
+  /* Warning badge border */
+  --color-warning-border-light: var(--warning-border-light);
+  /* Brand badge (built-in skill badge) */
+  --color-brand-badge-bg: var(--brand-badge-bg);
+  --color-brand-badge-border: var(--brand-badge-border);
+  --color-brand-badge-text: var(--brand-badge-text);
+  /* Success loud (Figma: background-success-loud) */
+  --color-success-loud: var(--success-loud);
+  --color-success-loud-hover: var(--success-loud-hover);
+  /* Assistant message bubble */
+  --color-message-assistant-bg: var(--message-assistant-bg);
+  /* User message bubble */
+  --color-message-user-bg: var(--message-user-bg);
+}
+
+@theme {
+  --font-content: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Consolas, monospace;
+
+  --radius-card: 18px;
+  --radius-full: 9999px;
+  /* Two-layer shadow: a tight contact edge plus a soft ambient lift. Tinted with
+     the palette's blue-grey rather than pure black so cards don't grey out. */
+  --shadow-card: 0 1px 2px hsl(240deg 12% 8% / 5%), 0 4px 12px hsl(240deg 12% 8% / 5%);
+}
+
+:root {
+  font-family:
+    "Geist",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    system-ui,
+    sans-serif;
+  line-height: 1.55;
+  font-weight: 400;
+  color-scheme: light;
+  color: var(--foreground);
+  background-color: var(--background);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Marshal design tokens — light mode (referenced by @theme inline).
+     Neutrals carry a slight blue cast (hue 240) so the greys read as cool
+     graphite rather than the warm paper of the inherited palette. */
+  --foreground-secondary: hsl(240, 12%, 38%);
+  --foreground-primary-hover: hsl(240, 10%, 4%);
+  --bg-disabled: hsl(240, 12%, 91%);
+  --border-loud: hsl(240, 10%, 52%);
+  --warning-primary: hsl(28, 88%, 38%);
+  --brand-subtle: hsl(250, 90%, 96%);
+  --brand-stroke: hsl(250, 70%, 66%);
+  --brand-border: hsl(250, 72%, 88%);
+  /* Assistant replies sit directly on the canvas with no bubble, so long
+     answers read as a document rather than a stack of cards. */
+  --message-assistant-bg: transparent;
+  /* The user's turn is the only thing that gets a fill, and it stays a tint */
+  --message-user-bg: hsl(250, 52%, 95%);
+  --bg-active-subtle: hsla(240, 10%, 8%, 0.06);
+  --warning-border-light: hsl(28, 90%, 82%);
+  /* Brand action — Marshal iris. Deepened on light so the accent reads as
+     signal on the cooler near-white field rather than a pale shadcn violet. */
+  --brand-action: hsl(250, 66%, 52%);
+  --brand-action-hover: hsl(250, 66%, 45%);
+  --brand-action-fg: hsl(0, 0%, 100%);
+  /* Neutral heavy — the near-black pill used by New chat + Stop */
+  --neutral-heavy: hsl(240, 10%, 10%);
+  --neutral-heavy-hover: hsl(240, 9%, 22%);
+  /* Brand badge (built-in skill badge) */
+  --brand-badge-bg: hsl(250, 90%, 96%);
+  --brand-badge-border: hsl(250, 66%, 74%);
+  --brand-badge-text: hsl(250, 56%, 46%);
+  /* Success loud */
+  --success-loud: hsl(162, 78%, 30%);
+  --success-loud-hover: hsl(162, 80%, 25%);
+  /* shadcn theme vars. The content plane keeps a cool near-white cast (hue 240,
+     raised saturation) so it is distinctly cooler than pure white without
+     leaving the "light" plane; the sidebar and fills below sit cooler still. */
+  --background-base: hsl(240, 30%, 98%);
+  --background: var(--background-base);
+  --foreground: hsl(240, 10%, 9%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(240, 10%, 9%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(240, 10%, 9%);
+  --primary: hsl(240, 10%, 10%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary-base: hsl(240, 24%, 94%);
+  --secondary: var(--secondary-base);
+  --secondary-foreground: hsl(240, 10%, 9%);
+  --muted-base: hsl(240, 24%, 94%);
+  --muted: var(--muted-base);
+  --muted-foreground: hsl(240, 10%, 42%);
+  --accent-base: hsl(240, 26%, 92%);
+  --accent: var(--accent-base);
+  --accent-foreground: hsl(240, 10%, 9%);
+  --destructive: hsl(0, 72%, 48%);
+  --border: hsl(240, 18%, 90%);
+  --input: hsl(240, 18%, 90%);
+  /* Focus rings pick up the brand rather than a grey, so keyboard focus is
+     unmistakable without adding a second accent colour. */
+  --ring: hsl(250, 66%, 52%);
+  --chart-1: hsl(250, 66%, 52%);
+  --chart-2: hsl(162, 78%, 30%);
+  --chart-3: hsl(28, 88%, 45%);
+  --chart-4: hsl(199, 89%, 42%);
+  --chart-5: hsl(240, 5%, 45%);
+  --radius: 0.75rem;
+  /* Sidebar reads as a recessed plane: a perceptible cool tint (hue 240, higher
+     saturation, a step down in lightness) separates it from the content plane by
+     tone, not a border. */
+  --sidebar-base: hsl(240, 30%, 95%);
+  --sidebar: var(--sidebar-base);
+  --sidebar-foreground: hsl(240, 10%, 9%);
+  --sidebar-primary: hsl(240, 10%, 10%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent-base: hsl(240, 26%, 92%);
+  --sidebar-accent: var(--sidebar-accent-base);
+  --sidebar-accent-foreground: hsl(240, 10%, 9%);
+  --sidebar-border: hsl(240, 18%, 90%);
+  --sidebar-ring: hsl(250, 66%, 52%);
+
+  /* Scrollbar tokens (from App.css) */
+  --scrollbar-thumb: hsla(240, 10%, 8%, 0.16);
+  --scrollbar-thumb-hover: hsla(240, 10%, 8%, 0.3);
+
+  /* Status tokens — light mode (dark variants in the [data-theme="dark"] block) */
+  --status-success-fg: hsl(162, 84%, 24%);
+  --status-success-bg: hsl(158, 60%, 97%);
+  --status-success-border: hsl(158, 46%, 78%);
+  --status-warning-fg: hsl(28, 88%, 32%);
+  --status-warning-bg: hsl(34, 100%, 97%);
+  --status-warning-border: hsl(30, 90%, 82%);
+
+  /* Custom status tokens */
+  --color-success: hsl(162, 78%, 34%);
+  --color-success-hover: hsl(162, 80%, 27%);
+  --color-success-border-light: hsl(158, 46%, 74%);
+  --color-danger: hsl(0, 72%, 48%);
+  --color-danger-border: hsl(0, 78%, 60%);
+  --color-danger-bg: hsl(0, 86%, 97%);
+  --color-warning: hsl(38, 92%, 48%);
+  --color-warning-text: hsl(28, 88%, 42%);
+  --color-info: hsl(199, 89%, 42%);
+  --color-link: hsl(250, 66%, 50%);
+  --bg-hover: hsl(240, 22%, 93%);
+  --bg-hover-strong: hsl(240, 20%, 88%);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* Custom scrollbars for Windows/Linux — macOS uses native overlay scrollbars */
+[data-platform="other"] *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+[data-platform="other"] *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-platform="other"] *::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 5px;
+}
+
+[data-platform="other"] *::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+a {
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Inactive window — title bar content dims while the window is unfocused.
+   Transition is only enabled once [data-window-ready] is set (after first
+   real focus→blur cycle) so the initial render never flashes. */
+/* Cross-platform (not macOS-only) inactive title bar dimming */
+[data-window-ready] header > * {
+  transition: opacity 0.15s ease;
+}
+[data-window-inactive] header > * {
+  opacity: 0.45;
+}
+
+[data-theme="dark"] {
+  /* Marshal design tokens — dark mode. The dark surface is a true cool
+     graphite; the inherited palette used a warm brown-grey (hue 20). */
+  --foreground-secondary: hsl(240, 5%, 65%);
+  --foreground-primary-hover: hsl(240, 20%, 98%);
+  --bg-disabled: hsl(240, 5%, 26%);
+  --border-loud: hsl(240, 5%, 52%);
+  --warning-primary: hsl(32, 95%, 68%);
+  --brand-subtle: hsl(250, 38%, 22%);
+  --brand-stroke: hsl(250, 70%, 68%);
+  --brand-border: hsl(250, 40%, 40%);
+  /* No bubble in dark either — see the light-mode note */
+  --message-assistant-bg: transparent;
+  --message-user-bg: hsl(248, 24%, 18%);
+  --bg-active-subtle: hsla(0, 0%, 100%, 0.08);
+  --warning-border-light: hsl(32, 60%, 36%);
+  /* Brand action dark — the iris lightens so it holds contrast on graphite */
+  --brand-action: hsl(252, 92%, 76%);
+  --brand-action-hover: hsl(252, 92%, 83%);
+  --brand-action-fg: hsl(250, 40%, 12%);
+  --neutral-heavy: hsl(240, 18%, 96%);
+  --neutral-heavy-hover: hsl(240, 12%, 86%);
+  /* Brand badge dark */
+  --brand-badge-bg: hsl(250, 40%, 20%);
+  --brand-badge-border: hsl(250, 60%, 60%);
+  --brand-badge-text: hsl(250, 80%, 84%);
+  /* Success loud dark */
+  --success-loud: hsl(162, 60%, 40%);
+  --success-loud-hover: hsl(162, 62%, 47%);
+  /* Status tokens dark — light values wash out as near-white panels on dark surfaces */
+  --status-success-fg: hsl(158, 60%, 66%);
+  --status-success-bg: hsl(160, 30%, 12%);
+  --status-success-border: hsl(158, 32%, 28%);
+  --status-warning-fg: hsl(32, 92%, 74%);
+  --status-warning-bg: hsl(28, 42%, 13%);
+  --status-warning-border: hsl(28, 52%, 32%);
+  /* shadcn dark theme vars */
+  --background-base: hsl(240, 10%, 7%);
+  --background: var(--background-base);
+  --foreground: hsl(240, 14%, 92%);
+  --card: hsl(240, 9%, 11%);
+  --card-foreground: hsl(240, 14%, 92%);
+  --popover: hsl(240, 9%, 11%);
+  --popover-foreground: hsl(240, 14%, 92%);
+  --primary: hsl(240, 14%, 92%);
+  --primary-foreground: hsl(240, 10%, 8%);
+  --secondary-base: hsl(240, 8%, 14%);
+  --secondary: var(--secondary-base);
+  --secondary-foreground: hsl(240, 14%, 92%);
+  --muted-base: hsl(240, 8%, 14%);
+  --muted: var(--muted-base);
+  --muted-foreground: hsl(240, 5%, 58%);
+  --accent-base: hsl(240, 8%, 16%);
+  --accent: var(--accent-base);
+  --accent-foreground: hsl(240, 14%, 92%);
+  --destructive: hsl(0, 84%, 68%);
+  --border: hsl(240, 6%, 20%);
+  --input: hsl(240, 6%, 22%);
+  --ring: hsl(252, 92%, 76%);
+  --chart-1: hsl(252, 92%, 76%);
+  --chart-2: hsl(162, 60%, 45%);
+  --chart-3: hsl(32, 95%, 65%);
+  --chart-4: hsl(199, 89%, 62%);
+  --chart-5: hsl(240, 5%, 58%);
+  --sidebar-base: hsl(240, 10%, 9%);
+  --sidebar: var(--sidebar-base);
+  --sidebar-foreground: hsl(240, 14%, 92%);
+  --sidebar-primary: hsl(240, 14%, 92%);
+  --sidebar-primary-foreground: hsl(240, 10%, 8%);
+  --sidebar-accent-base: hsl(240, 8%, 16%);
+  --sidebar-accent: var(--sidebar-accent-base);
+  --sidebar-accent-foreground: hsl(240, 14%, 92%);
+  --sidebar-border: hsl(240, 6%, 20%);
+  --sidebar-ring: hsl(252, 92%, 76%);
+
+  /* Scrollbar tokens dark */
+  --scrollbar-thumb: hsla(0, 0%, 100%, 0.16);
+  --scrollbar-thumb-hover: hsla(0, 0%, 100%, 0.3);
+
+  /* Custom status tokens dark */
+  --color-success: hsl(158, 64%, 52%);
+  --color-success-hover: hsl(158, 64%, 44%);
+  --color-success-border-light: hsla(158, 64%, 52%, 0.3);
+  --color-danger: hsl(0, 84%, 71%);
+  --color-danger-border: hsl(0, 84%, 62%);
+  --color-danger-bg: hsla(0, 84%, 71%, 0.15);
+  --color-warning: hsl(38, 92%, 62%);
+  --color-warning-text: hsl(28, 96%, 66%);
+  --color-info: hsl(199, 89%, 66%);
+  --color-link: hsl(252, 92%, 79%);
+  --bg-hover: hsl(240, 7%, 17%);
+  --bg-hover-strong: hsl(240, 7%, 23%);
+}
+
+/* ── macOS vibrancy ──────────────────────────────────────────────────────────
+   Placed AFTER both light (:root) and dark ([data-theme="dark"]) blocks so
+   these overrides win the cascade. Semi-transparent backgrounds let the native
+   NSVisualEffectView (frosted glass) show through.
+
+   html / body / #root get transparent backgrounds via [data-vibrancy] CSS
+   rules below. The actual tint comes from the layout components (sidebar,
+   header, main).
+
+   All vibrancy CSS is gated on `[data-vibrancy]`, an attribute managed by
+   `applyTheme()` in app-theme.ts. This decouples vibrancy from theme-mode logic so
+   changes to the boot sequence or localStorage caching can't silently break it. */
+[data-vibrancy],
+[data-vibrancy] body,
+[data-vibrancy] #root {
+  background-color: transparent !important;
+}
+/* Active window: fully transparent — vibrancy shows through.
+   color-mix() reads --*-base vars which already have the correct value
+   per theme, so no separate light/dark active blocks are needed. */
+[data-vibrancy] {
+  --vibrancy-alpha: 0%;
+  --background: color-mix(in srgb, var(--background-base) var(--vibrancy-alpha), transparent);
+  --accent: color-mix(in srgb, var(--accent-base) var(--vibrancy-alpha), transparent);
+  --sidebar: color-mix(in srgb, var(--sidebar-base) var(--vibrancy-alpha), transparent);
+  --sidebar-accent: color-mix(
+    in srgb,
+    var(--sidebar-accent-base) var(--vibrancy-alpha),
+    transparent
+  );
+  --secondary: color-mix(in srgb, var(--secondary-base) var(--vibrancy-alpha), transparent);
+  --muted: color-mix(in srgb, var(--muted-base) var(--vibrancy-alpha), transparent);
+}
+/* Inactive window: raise alpha so vibrancy is less prominent.
+   --sidebar-accent uses slightly lower alpha (80%/78%) for visual depth. */
+[data-vibrancy][data-window-inactive] {
+  --vibrancy-alpha: 82%;
+  --sidebar-accent: color-mix(in srgb, var(--sidebar-accent-base) 80%, transparent);
+}
+/* Dark inactive: accent/sidebar use slightly lower alpha for depth */
+[data-vibrancy][data-theme="dark"][data-window-inactive] {
+  --accent: color-mix(in srgb, var(--accent-base) 80%, transparent);
+  --sidebar: color-mix(in srgb, var(--sidebar-base) 80%, transparent);
+  --sidebar-accent: color-mix(in srgb, var(--sidebar-accent-base) 78%, transparent);
+}
+/* Main content: opaque on macOS so chat has no vibrancy bleed-through */
+[data-vibrancy] [data-vibrancy-opaque] {
+  background-color: var(--background-base);
+}
+/* Restore opaque backgrounds on controls and overlays that should not be
+   transparent.  Vibrancy makes --background/--secondary/--muted transparent
+   globally, but small controls (switch thumbs, radio dots) and overlays
+   (dialogs, popovers) need solid backgrounds to remain visible. */
+[data-vibrancy] [data-slot="switch-thumb"],
+[data-vibrancy] [data-slot="dialog-content"],
+[data-vibrancy] [data-slot="popover-content"],
+[data-vibrancy] [data-slot="hover-card-content"],
+[data-vibrancy] [data-slot="select-content"],
+[data-vibrancy] [data-slot="dropdown-menu-content"],
+[data-vibrancy] [data-slot="context-menu-content"],
+[data-vibrancy] [data-slot="context-menu-sub-content"],
+[data-vibrancy] [data-slot="tooltip-content"],
+[data-vibrancy] [data-slot="command"],
+/* Streamdown's table copy/download dropdown rolls its own primitive (no
+   data-slot), so the shadcn selectors above don't catch it. Its surface uses
+   `bg-background`, which goes transparent under vibrancy and lets the table
+   bleed through. */
+[data-vibrancy] [data-streamdown="table-wrapper"] [class~="bg-background"],
+/* Streamdown's table fullscreen overlay portals to <body> with classes
+   `fixed inset-0 z-50 flex flex-col bg-background`. Under vibrancy
+   `--background` is transparent, so the overlay is invisible and the table
+   appears to float over the chat content beneath. */
+[data-vibrancy] [data-streamdown="table-fullscreen"] {
+  --background: var(--background-base);
+  --secondary: var(--secondary-base);
+  --muted: var(--muted-base);
+  --accent: var(--accent-base);
+}
+/* text-background is used for inverted text (e.g. white text on dark pill).
+   Under vibrancy --background is transparent, making this text invisible.
+   Apply unconditionally to plain .text-background; for data-active/data-state
+   variants, gate by the actual state so we don't over-apply background color
+   to inactive elements (e.g. inactive tab triggers whose class string still
+   contains "data-active:text-background"). */
+[data-vibrancy] .text-background,
+[data-vibrancy] [data-state="active"][class*="text-background"],
+[data-vibrancy] [data-active]:not([data-active="false"])[class*="text-background"] {
+  color: var(--background-base) !important;
+}
+
+@theme inline {
+  --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --color-brand-action: var(--brand-action);
+  --color-brand-action-hover: var(--brand-action-hover);
+  --color-brand-action-fg: var(--brand-action-fg);
+  --color-neutral-heavy: var(--neutral-heavy);
+  --color-neutral-heavy-hover: var(--neutral-heavy-hover);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  /* Figma status tokens (mode-invariant) — enables bg-status-*, text-status-*, border-status-* */
+  --color-status-success-fg: var(--status-success-fg);
+  --color-status-success-bg: var(--status-success-bg);
+  --color-status-success-border: var(--status-success-border);
+  --color-status-warning-fg: var(--status-warning-fg);
+  --color-status-warning-bg: var(--status-warning-bg);
+  --color-status-warning-border: var(--status-warning-border);
+  /* Not circular: @theme's --color-success registers the :root --color-success
+     CSS var as a Tailwind color, enabling text-success, bg-success, etc. */
+  --color-success: var(--color-success);
+  /* Custom animation — enables animate-shimmer-text */
+  --animate-shimmer-text: shimmer-text 2s ease-in-out infinite;
+  /* Collapsible expand/collapse — uses Radix CSS variable for measured height */
+  --animate-collapsible-down: collapsible-down 0.2s ease-out;
+  --animate-collapsible-up: collapsible-up 0.2s ease-out;
+  /* Attention-grabbing wiggle for the feedback button when a report is
+     ready. Long cycle so it pulses, not vibrates — a quick shake then a
+     few seconds of stillness before repeating. */
+  --animate-attention-shake: attention-shake 4s ease-in-out infinite;
+}
+
+@keyframes shimmer-text {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+/* Slow drifting gradient blob behind the welcome state — subtle ambient
+   shimmer cycle. Animates translate+rotate rather than background-position
+   so the 180px blur stays smooth. */
+@keyframes welcome-shimmer {
+  0%,
+  100% {
+    transform: translate(-50%, 0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate(-46%, -40px) rotate(8deg) scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-welcome-bg] > div {
+    animation: none !important;
+  }
+}
+
+@keyframes collapsible-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+  }
+}
+
+@keyframes collapsible-up {
+  from {
+    height: var(--radix-collapsible-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+@keyframes attention-shake {
+  0%,
+  85%,
+  100% {
+    transform: rotate(0deg);
+  }
+  88% {
+    transform: rotate(-12deg);
+  }
+  91% {
+    transform: rotate(10deg);
+  }
+  94% {
+    transform: rotate(-8deg);
+  }
+  97% {
+    transform: rotate(6deg);
+  }
+}
+
+/* ── Theme switch view transition (radial reveal) ───── */
+/* Only apply the radial clip-path when .theme-transitioning is set;
+   other view transitions (panel switches) use the default cross-fade. */
+html.theme-transitioning::view-transition-old(root) {
+  animation: none;
+  z-index: 1;
+}
+
+html.theme-transitioning::view-transition-new(root) {
+  animation: vt-reveal 0.5s ease-out;
+  z-index: 9999;
+}
+
+@keyframes vt-reveal {
+  from {
+    clip-path: circle(0% at var(--vt-x, 50%) var(--vt-y, 50%));
+  }
+  to {
+    clip-path: circle(150% at var(--vt-x, 50%) var(--vt-y, 50%));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
+/* Block-level fade-in for streaming assistant messages. CSS animations only
+   run once per element on mount — so a paragraph/heading/list item fades in
+   when it first appears in the DOM, then grows silently as tokens arrive.
+   Only applied to the streaming message (scoped via a [data-streaming]
+   wrapper around MarkdownRenderer); committed history renders without
+   animation. */
+[data-streaming] :where(p, h1, h2, h3, h4, h5, h6, li, pre, blockquote, hr, table, img) {
+  animation: streaming-block-fade-in 1200ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+@keyframes streaming-block-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-streaming] :where(p, h1, h2, h3, h4, h5, h6, li, pre, blockquote, hr, table, img) {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  [data-app-notice-rail],
+  [data-app-notice-panel] {
+    border: 1px solid CanvasText;
+    forced-color-adjust: auto;
+  }
+
+  [data-app-notice-severity] {
+    background: Highlight;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+    interpolate-size: allow-keywords;
+  }
+}
+
+/* Hide avatars in Co-Create compact chat */
+[data-hide-avatars] [data-testid="assistant-run-avatar"] {
+  display: none;
+}
+
+/* ── InteractiveTable (migrated from InteractiveTable.css) ──── */
+.md-it-drop-row-target td {
+  border-top: 2px solid var(--color-accent, #7c5cbf);
+}
+
+/* ── FilePreview editor (migrated from FilePreview.css) ─────── */
+
+/* Heading segment styles */
+.md-seg-h1 {
+  font-size: 1.6em;
+  font-weight: 700;
+  padding-top: 0.6em;
+  padding-bottom: 0.15em;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.3em;
+}
+.md-seg-h2 {
+  font-size: 1.35em;
+  font-weight: 600;
+  padding-top: 0.5em;
+  padding-bottom: 0.1em;
+}
+.md-seg-h3 {
+  font-size: 1.15em;
+  font-weight: 600;
+  padding-top: 0.3em;
+}
+.md-seg-h4 {
+  font-size: 1em;
+  font-weight: 600;
+  padding-top: 0.2em;
+}
+.md-seg-h5 {
+  font-size: 0.95em;
+  font-weight: 600;
+  padding-top: 0.15em;
+}
+.md-seg-h6 {
+  font-size: 0.9em;
+  font-weight: 600;
+  color: var(--foreground-secondary);
+  padding-top: 0.1em;
+}
+
+/* List item padding */
+.md-seg-list-item {
+  padding-left: 16px;
+}
+
+/* Collapse chevron — hidden by default, visible on hover or when collapsed */
+.md-seg-heading .md-seg-collapse,
+.md-seg-list-item .md-seg-collapse {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+.md-seg-heading:hover .md-seg-collapse,
+.md-seg-heading .md-seg-collapse:not(.rotate-90),
+.md-seg-list-item:hover .md-seg-collapse,
+.md-seg-list-item .md-seg-collapse:not(.rotate-90) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Drag handle: show on segment hover (uses standard :hover, not Tailwind
+   group-hover which is unreliable in headless Electron on some CI runners) */
+.md-seg:hover .md-seg-drag-handle {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Comment segment styling */
+.md-seg-comment {
+  border-left: 3px solid #d29922;
+  background: rgba(210, 153, 34, 0.06);
+  border-radius: 0 6px 6px 0;
+  padding: 6px 10px 6px 12px;
+  margin: 4px 0;
+  cursor: default;
+}
+.md-seg-comment:hover {
+  background: rgba(210, 153, 34, 0.1);
+}
+
+/* Callout label colors */
+.md-callout-note .md-callout-label {
+  color: #58a6ff;
+}
+.md-callout-tip .md-callout-label {
+  color: #3fb950;
+}
+.md-callout-warning .md-callout-label {
+  color: #d29922;
+}
+.md-callout-caution .md-callout-label {
+  color: #f85149;
+}
+.md-callout-important .md-callout-label {
+  color: #a371f7;
+}
+
+/* Inline kbd styling inside the markdown editor */
+.md-custom-editor kbd {
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 6px;
+  font-size: 0.85em;
+  font-family: var(--font-mono);
+  box-shadow: 0 1px 0 var(--border);
+}
+
+/* Raw HTML blocks rendered inside markdown preview should inherit markdown-like typography */
+.md-custom-editor .md-html-block h1,
+.md-custom-editor .md-html-block h2,
+.md-custom-editor .md-html-block h3,
+.md-custom-editor .md-html-block h4,
+.md-custom-editor .md-html-block h5,
+.md-custom-editor .md-html-block h6 {
+  margin: 0 0 0.35em;
+  color: var(--foreground);
+  line-height: 1.25;
+}
+
+.md-custom-editor .md-html-block h1 {
+  font-size: 1.6em;
+  font-weight: 700;
+}
+
+.md-custom-editor .md-html-block h2 {
+  font-size: 1.35em;
+  font-weight: 600;
+}
+
+.md-custom-editor .md-html-block h3 {
+  font-size: 1.15em;
+  font-weight: 600;
+}
+
+.md-custom-editor .md-html-block h4,
+.md-custom-editor .md-html-block h5,
+.md-custom-editor .md-html-block h6 {
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.md-custom-editor .md-html-block p {
+  margin: 0 0 0.75em;
+}
+
+.md-custom-editor .md-html-block p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Search highlighting ─────────────────────────────────────── */
+.md-search-highlight {
+  background-color: color-mix(in srgb, var(--color-warning) 40%, transparent);
+  border-radius: 2px;
+  color: inherit;
+}
+
+.md-search-highlight-active {
+  background-color: color-mix(in srgb, var(--color-warning-text) 60%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--color-warning-text) 80%, transparent);
+  outline-offset: -1px;
+  color: inherit;
+}
+
+/* ── Chat markdown tables — flat per Figma: no outer bg, subtle borders */
+[data-streamdown="table-wrapper"] {
+  background-color: transparent;
+  border-width: 0;
+  padding: 0;
+  gap: 0.75rem;
+}
+/* Inner div that wraps the <table> — strip its bg-background so the message
+   background shows through, and recolor the table frame + row dividers to the
+   theme border. Scoped narrowly so dropdowns/code blocks inside the wrapper
+   keep the theme --color-border. */
+[data-streamdown="table-wrapper"] > div:has(> [data-streamdown="table"]) {
+  background-color: transparent;
+  border-color: var(--border);
+}
+[data-streamdown="table-wrapper"] [data-streamdown="table-body"] > tr {
+  border-color: var(--border);
+}
+/* Streamdown's thead uses bg-muted/80; on macOS --muted gets vibrancy-tinted
+   transparent when the window is focused, making the header fade to white.
+   Pin to --muted-base (opaque) so the header reads consistent focus/no-focus.
+   Both themes separate --muted-base from the message background, so the header
+   stays legible without a per-theme override. */
+[data-streamdown="table-wrapper"] [data-streamdown="table-header"] {
+  background-color: var(--muted-base);
+}
+/* ── Chat markdown headings — match Figma scale.
+   Use h1/h2/h3 type selectors to out-specific streamdown's text-3xl/2xl/xl. */
+h1[data-streamdown="heading-1"] {
+  font-size: 26px;
+  line-height: 1.2;
+}
+h2[data-streamdown="heading-2"] {
+  font-size: 20px;
+  line-height: 1.2;
+}
+h3[data-streamdown="heading-3"] {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+[data-streamdown] [dir="auto"],
+[data-streamdown] [dir="rtl"],
+[data-streamdown] [dir="ltr"] {
+  text-align: start;
+}
+
+[data-streamdown] pre,
+[data-streamdown] pre code {
+  unicode-bidi: isolate;
+  direction: ltr;
+  text-align: left;
+}
+
+[data-streamdown] ul,
+[data-streamdown] ol {
+  padding-inline-start: 2em;
+  padding-inline-end: 0;
+}
+
+/* Extension document annotations in Monaco (ui.document.open / ui.document.annotate). */
+.marshal-annotation-info-gutter,
+.marshal-annotation-positive-gutter,
+.marshal-annotation-warning-gutter,
+.marshal-annotation-muted-gutter {
+  margin-left: 3px;
+  width: 4px !important;
+  border-radius: 2px;
+}
+.marshal-annotation-info-gutter {
+  background: hsl(210 90% 55%);
+}
+.marshal-annotation-positive-gutter {
+  background: hsl(145 60% 42%);
+}
+.marshal-annotation-warning-gutter {
+  background: hsl(32 92% 50%);
+}
+.marshal-annotation-muted-gutter {
+  background: hsl(220 8% 60%);
+}
+.marshal-annotation-info-line {
+  background: hsl(210 90% 55% / 0.07);
+}
+.marshal-annotation-positive-line {
+  background: hsl(145 60% 42% / 0.07);
+}
+.marshal-annotation-warning-line {
+  background: hsl(32 92% 50% / 0.09);
+}
+.marshal-annotation-muted-line {
+  background: hsl(220 8% 60% / 0.06);
+}
+.marshal-annotation-info-label,
+.marshal-annotation-positive-label,
+.marshal-annotation-warning-label,
+.marshal-annotation-muted-label {
+  font-style: italic;
+  font-size: 0.92em;
+}
+.marshal-annotation-info-label {
+  color: hsl(210 80% 52%);
+}
+.marshal-annotation-positive-label {
+  color: hsl(145 55% 38%);
+}
+.marshal-annotation-warning-label {
+  color: hsl(32 90% 45%);
+}
+.marshal-annotation-muted-label {
+  color: hsl(220 8% 55%);
+}
+
+/* Mermaid viewer (src/features/mermaid): hover highlights a node, its edges and
+   neighbours, and dims the rest. Lives here because it targets Mermaid's SVG. */
+[data-marshal-mermaid="stage"] svg :is(g.node, g.edgeLabel, path[data-edge]) {
+  transition: opacity 120ms ease;
+}
+
+[data-marshal-mermaid="stage"] svg[data-mermaid-focus] :is(g.node, g.edgeLabel, path[data-edge]) {
+  opacity: 0.25;
+}
+
+[data-marshal-mermaid="stage"]
+  svg[data-mermaid-focus]
+  :is(g.node, g.edgeLabel, path[data-edge])[data-mermaid-active] {
+  opacity: 1;
+}
+
+[data-marshal-mermaid="stage"] svg path[data-edge][data-mermaid-active] {
+  stroke: var(--brand-stroke) !important;
+  stroke-width: 2.25px !important;
+}
+
+[data-marshal-mermaid="stage"]
+  svg
+  g.node[data-mermaid-hovered]
+  :is(rect, polygon, circle, ellipse, path) {
+  stroke: var(--brand-stroke) !important;
+  stroke-width: 2px !important;
+}

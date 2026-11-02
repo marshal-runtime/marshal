@@ -1,0 +1,18 @@
+{
+
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    // Daemon code runs on Node (not in the bundler). Override the renderer
+    // tooling defaults inherited from root for: module resolution (NodeNext
+    // not bundler), libs (no DOM), types (node not browser globals).
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "noEmit": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}

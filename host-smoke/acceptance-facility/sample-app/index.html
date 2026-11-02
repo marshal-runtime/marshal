@@ -1,0 +1,178 @@
+<!doctype html>
+<!--
+  Minimal packaged HTML sample app for the D4 acceptance facility. Tall
+  content (1600px) so geometry regressions (D1) are visible; includes a
+  scroll sentinel, a paginated list, a native selection control, a text
+  input, and a deliberate error-feedback path. Every interactive control
+  reports its own DOM event back to the host via the same `tools/call`
+  JSON-RPC contract PackagedRuntimeUiRenderer.browser.test.tsx already uses,
+  so ../native-frame/controlled-scenarios.browser.test.tsx can drive this
+  frame with real, externally-dispatched browser automation (via
+  page.frameLocator, which reaches inside the sandboxed cross-origin iframe)
+  and then independently confirm — from the sandboxed content's own
+  perspective — that the click/type/scroll/select actually landed. Not
+  installed into the live extension library; loaded only as a resource by
+  this facility's own scripts and tests.
+-->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        font-family: sans-serif;
+      }
+      main {
+        min-height: 1700px;
+        background: linear-gradient(#f5f5f5, #d8d8d8);
+        padding: 16px;
+        box-sizing: border-box;
+      }
+      #sentinel {
+        margin-top: 1500px;
+      }
+      .long-line {
+        white-space: pre;
+        overflow-x: auto;
+        display: block;
+        font-family: monospace;
+      }
+      #error-banner {
+        display: none;
+        background: #b91c1c;
+        color: white;
+        padding: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1 id="title">Acceptance sample</h1>
+      <div id="error-banner" role="alert"></div>
+      <label>
+        Query
+        <input id="query-input" type="text" />
+      </label>
+      <button id="refresh-button" type="button">Refresh</button>
+      <button id="fail-button" type="button">Trigger error</button>
+      <label>
+        Item
+        <select id="item-select">
+          <option value="one">Item one</option>
+          <option value="two">Item two</option>
+          <option value="three">Item three</option>
+        </select>
+      </label>
+      <div id="selection-readout">selected: none</div>
+      <ol id="page-list"></ol>
+      <button id="page-next" type="button">Load more</button>
+      <pre class="long-line" id="long-line" data-testid="long-line-content"></pre>
+      <div id="sentinel" data-testid="bottom-sentinel">Bottom reached</div>
+    </main>
+    <script>
+      (function () {
+        var page = 1;
+        var pageSize = 3;
+        var totalItems = 9;
+        var reportSequence = 0;
+
+        function send(id, method, params) {
+          parent.postMessage({ jsonrpc: "2.0", id: id, method: method, params: params }, "*");
+        }
+
+        function report(event, extra) {
+          reportSequence += 1;
+          send("report-" + reportSequence, "tools/call", {
+            name: "sample.report",
+            arguments: Object.assign({ event: event }, extra || {}),
+          });
+        }
+
+        function renderPage(pageNumber) {
+          var list = document.getElementById("page-list");
+          list.innerHTML = "";
+          var start = (pageNumber - 1) * pageSize;
+          for (var i = start; i < Math.min(start + pageSize, totalItems); i += 1) {
+            var li = document.createElement("li");
+            li.textContent = "row " + (i + 1) + " (page " + pageNumber + ")";
+            li.setAttribute("data-row-index", String(i + 1));
+            list.appendChild(li);
+          }
+          document.getElementById("page-next").disabled = start + pageSize >= totalItems;
+        }
+
+        function wire() {
+          renderPage(page);
+          document.getElementById("page-next").addEventListener("click", function () {
+            page += 1;
+            renderPage(page);
+            report("page-loaded", {
+              page: page,
+              firstRowText: document.querySelector("#page-list li")?.textContent ?? null,
+            });
+          });
+          document.getElementById("item-select").addEventListener("change", function (event) {
+            document.getElementById("selection-readout").textContent =
+              "selected: " + event.target.value;
+            report("selected", {
+              value: event.target.value,
+              readoutText: document.getElementById("selection-readout").textContent,
+            });
+          });
+          document.getElementById("query-input").addEventListener("input", function (event) {
+            report("typed", { value: event.target.value });
+          });
+          document.getElementById("refresh-button").addEventListener("click", function () {
+            document.getElementById("error-banner").style.display = "none";
+            document.getElementById("title").textContent = "Acceptance sample (refreshed)";
+            report("refreshed", {});
+          });
+          document.getElementById("fail-button").addEventListener("click", function () {
+            var banner = document.getElementById("error-banner");
+            banner.style.display = "block";
+            banner.textContent = "Deliberate acceptance-facility error: provider read failed.";
+            report("error-shown", {
+              visible: banner.style.display === "block",
+              text: banner.textContent,
+            });
+          });
+          var longLine = document.getElementById("long-line");
+          longLine.textContent = "x".repeat(400);
+          // Independent, content-side measurement of the same defect class the
+          // audit flagged ("Long extension diff lines also overflow into a
+          // hidden region"): report the real scrollWidth/clientWidth/overflow
+          // policy the sandboxed app observes about its own DOM, since the
+          // outer test cannot read into this cross-origin frame's layout.
+          report("ready", {
+            longLine: {
+              scrollWidth: longLine.scrollWidth,
+              clientWidth: longLine.clientWidth,
+              overflowX: getComputedStyle(longLine).overflowX,
+            },
+          });
+          window.addEventListener(
+            "scroll",
+            function () {
+              if (window.scrollY > 1400)
+                report("scrolled-near-bottom", { scrollY: window.scrollY });
+            },
+            { passive: true },
+          );
+        }
+
+        // ui/* JSON-RPC handshake, matching the packaged-renderer contract
+        // (electron/marshal-runtime host wraps every packaged HTML app in this
+        // handshake before it becomes interactive): the child requests
+        // ui/initialize, waits for the host's matching reply, wires its
+        // controls, then declares itself initialized.
+        addEventListener("message", function (event) {
+          if (event.data && event.data.id === "initialize") {
+            wire();
+            send(undefined, "ui/notifications/initialized", {});
+          }
+        });
+        send("initialize", "ui/initialize", {});
+      })();
+    </script>
+  </body>
+</html>

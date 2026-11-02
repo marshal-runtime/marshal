@@ -1,0 +1,6 @@
+{
+  "allowUnrestrictedFileAccess": false,
+  "browser": {
+    "contextOptions": { "acceptDownloads": false }
+  }
+}

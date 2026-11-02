@@ -1,0 +1,30 @@
+{
+
+  "permissions": {
+    "allow": [
+      "Bash(pnpm test)",
+      "Bash(pnpm test:watch)",
+      "Bash(pnpm test:coverage)",
+      "Bash(pnpm test **)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm lint:files *)",
+      "Bash(pnpm test:e2e)",
+      "Bash(pnpm test:e2e:file *)",
+      "Bash(pnpm test:e2e:real)",
+      "Bash(pnpm build)",
+      "Bash(pnpm build:vite)",
+      "Bash(pnpm electron:dev)",
+      "Bash(pnpm electron:build)",
+      "Bash(pnpm electron:debug)",
+      "Bash(pnpm typecheck)",
+      "Bash(pnpm format)",
+      "Bash(pnpm dev)",
+      "Bash(pnpm install)",
+      "Bash(git status *)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git show *)"
+    ],
+    "deny": []
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "id": "TODO-kebab-case-id",
+  "version": "1.0.0",
+  "title": "TODO Display Title",
+  "description": "TODO short description shown in Library card",
+  "permissions": { "mode": "ask" },
+  "cloudSync": "inherit-host"
+}

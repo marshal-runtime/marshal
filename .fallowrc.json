@@ -1,0 +1,84 @@
+{
+  "$schema": "https://docs.fallow.tools/schema/fallowrc.json",
+  "ignoreDependencies": [
+    "@modelcontextprotocol/server-filesystem",
+    "@playwright/mcp",
+    "@radix-ui/react-hover-card",
+    "@tanstack/eslint-plugin-query",
+    "eslint-plugin-better-tailwindcss",
+    "eslint-plugin-playwright",
+    "eslint-plugin-react-hooks",
+    "eslint-plugin-testing-library",
+    "hast",
+    "mermaid",
+    "shadcn",
+    "unified",
+    "unist-util-visit"
+  ],
+  "ignoreExports": [
+    {
+      "file": "src/services/telemetry/schema/**",
+      "exports": ["*"]
+    },
+    {
+      "file": "src/types/electron.d.ts",
+      "exports": ["*"]
+    },
+    {
+      "file": "src/test-utils.tsx",
+      "exports": ["*"]
+    },
+    {
+      "file": "electron/backend/types.ts",
+      "exports": [
+        "DesktopCapabilities",
+        "ApprovalCardRequest",
+        "ApprovalCardDecision",
+        "LocalPolicyRequest",
+        "PolicyDecision",
+        "LocalToolRequest",
+        "LocalToolResult",
+        "TokenAcquisitionRequest",
+        "TokenAcquisitionResult",
+        "NotificationRequest"
+      ]
+    },
+    {
+      "file": "electron/workspace-store.ts",
+      "exports": ["loadWorkspaceStore", "saveWorkspaceStore"]
+    },
+    {
+      "file": "electron/schemas/session-schema.ts",
+      "exports": ["_QuestionAnswerSchemaMatchesShared", "_MessageQuestionSchemaMatchesShared"]
+    },
+    {
+      "file": "common/marshal-ipc-contract.ts",
+      "exports": [
+        "RuntimeEventWrapper",
+        "CopilotAttachment",
+        "AutomationStepResult",
+        "MServerPermissions",
+        "ServerPermission",
+        "ToolInfo",
+        "UserIdentityIntegration",
+        "UserIdentitySignOut",
+        "GatewayAuthStatus",
+        "WorkspaceDirEntry",
+        "SourceAnnotation",
+        "HorizonUrgency",
+        "CardCuration",
+        "IpcEventMap",
+        "MiniModeAPI"
+      ]
+    }
+  ],
+  "ignorePatterns": [
+    "eslint-plugins/**",
+    "public/**",
+    "electron/mini-mode-page/**",
+    "electron/__mocks__/**",
+    "electron/testing/harness/**",
+    "electron/test-helpers/**",
+    "scripts/**"
+  ]
+}

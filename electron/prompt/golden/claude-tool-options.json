@@ -1,0 +1,40 @@
+{
+  "unrestricted-main": {
+    "tools": {
+      "type": "preset",
+      "preset": "claude_code"
+    },
+    "skills": "all",
+    "settingSources": ["project"],
+    "hasDisallowedTools": false,
+    "hasToolAliases": false,
+    "mcpServerNames": null
+  },
+  "allowlist-with-host-tools": {
+    "tools": ["Read", "Skill"],
+    "skills": "all",
+    "settingSources": ["project"],
+    "hasDisallowedTools": false,
+    "hasToolAliases": false,
+    "mcpServerNames": null
+  },
+  "tool-free": {
+    "tools": [],
+    "skills": [],
+    "settingSources": ["project"],
+    "hasDisallowedTools": false,
+    "hasToolAliases": false,
+    "mcpServerNames": null
+  },
+  "no-project-context": {
+    "tools": {
+      "type": "preset",
+      "preset": "claude_code"
+    },
+    "skills": [],
+    "settingSources": [],
+    "hasDisallowedTools": false,
+    "hasToolAliases": false,
+    "mcpServerNames": null
+  }
+}

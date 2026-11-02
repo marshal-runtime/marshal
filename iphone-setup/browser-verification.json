@@ -1,0 +1,164 @@
+{
+  "verifiedDate": "2026-09-13",
+  "command": "./node_modules/.bin/playwright test e2e/remote-access.test.ts e2e/remote-phone-layout.test.ts --workers=1 --retries=0",
+  "result": {
+    "passed": 4,
+    "failed": 0,
+    "retries": 0,
+    "durationSeconds": 29.4
+  },
+  "engines": [
+    "Chromium",
+    "WebKit"
+  ],
+  "viewportSizes": [
+    [
+      393,
+      852
+    ],
+    [
+      852,
+      393
+    ],
+    [
+      375,
+      667
+    ],
+    [
+      393,
+      500
+    ]
+  ],
+  "keyboardSurrogate": {
+    "layoutViewport": [
+      393,
+      852
+    ],
+    "visibleShellHeight": 500,
+    "physicalKeyboardTest": false
+  },
+  "runtime": "Real Electron application, HTTP/WebSocket transport and browser UI; seeded mock assistant runtime",
+  "verified": [
+    "Access-key form login",
+    "QR key fragment login and URL cleanup",
+    "New conversation and touch session switching",
+    "Concurrent browser session updates",
+    "Text and image attachment selection/upload UI",
+    "Send, streaming assistant display and Stop",
+    "Draft survives page reload",
+    "Offline/online recovery and backend-confirmed subsequent send",
+    "Touch model change with checked selection after reopen",
+    "Phone Allow/Not now decisions after all Mac windows close",
+    "No horizontal document overflow in asserted viewport states",
+    "44px composer/model/approval touch controls",
+    "Approval scrolling and unobscured decision control under keyboard-height surrogate"
+  ],
+  "observations": {
+    "modelLabel": "Claude Opus 4.7\n",
+    "modelBounds": {
+      "x": 23,
+      "y": 27,
+      "width": 248,
+      "height": 44
+    },
+    "sendBounds": {
+      "x": 330,
+      "y": 425,
+      "width": 44,
+      "height": 44
+    },
+    "allowBounds": {
+      "x": 37,
+      "y": 281,
+      "width": 88.359375,
+      "height": 44
+    },
+    "keyboardAllow": {
+      "x": 37,
+      "y": 281,
+      "width": 88.359375,
+      "height": 44
+    },
+    "keyboardStop": {
+      "x": 330,
+      "y": 425,
+      "width": 44,
+      "height": 44
+    },
+    "errors": []
+  },
+  "remainingPhysicalChecks": [
+    "Actual iPhone Safari and Home Screen installation",
+    "Actual iOS keyboard, safe-area and device rotation",
+    "Tailscale sign-in, HTTPS and cellular connection to the Mac",
+    "Live production model/backend run"
+  ],
+  "navigationFollowUp": {
+    "date": "2026-09-13",
+    "passed": [
+      "existing 4 chat/layout browser tests",
+      "full-screen project/search/navigation and visual viewport offset regression"
+    ],
+    "checks": "11 server/unit tests, TypeScript, lint and production build pass",
+    "physicalKeyboardRetestRequired": true
+  },
+  "projectControlsFollowUp": {
+    "date": "2026-09-13",
+    "test": "e2e/remote-project-controls.test.ts",
+    "result": "passed",
+    "verified": [
+      "persisted group collapse preference",
+      "backend persisted pin/unpin across reload",
+      "project-specific create",
+      "default General selector",
+      "project change preserves text and file attachment",
+      "desktop selection unchanged",
+      "project locked after send",
+      "keyboard/approval layout regression passes"
+    ],
+    "unitBaseline": "ChatInput suite: same 76 pass / 1 person-picker failure and 48 Monaco cancellation errors reproduced in isolated unchanged HEAD checkout; no new failures."
+  },
+  "mobilePolish": {
+    "date": "2026-09-13",
+    "browserSuite": {
+      "passed": 6,
+      "failed": 0,
+      "log": "/tmp/marshal-polish-e2e-final.txt"
+    },
+    "unreadLifecycle": {
+      "passed": 1,
+      "failed": 0,
+      "log": "/tmp/marshal-polish-unread-e2e.txt"
+    },
+    "checks": [
+      "Composer surface within 8 CSS pixels of reduced viewport bottom",
+      "Compact slash and mention menus",
+      "Timeline filters accessible in header",
+      "Running session marker backed by live session state",
+      "Unread update marker clears on opening conversation",
+      "Project draft text and attachments survive switching",
+      "Chromium and WebKit send, reconnect, permissions, landscape"
+    ],
+    "limitations": [
+      "Keyboard is simulated using viewport resizing/panning; physical iPhone keyboard still requires user confirmation.",
+      "Desktop Cmd+2 picker shortcut unit test fails identically on unchanged HEAD; 32 other focused unit tests pass."
+    ],
+    "build": "Production Vite build passed; running port 7331 serves refreshed frontend.",
+    "fileSearch": {
+      "passed": true,
+      "log": "/tmp/marshal-polish-files-e2e.txt",
+      "deployment": "Backend handler built but pending restart; three active conversations left uninterrupted."
+    },
+    "serverTests": {
+      "passed": 11,
+      "failed": 0
+    }
+  },
+  "fullWidthReplies": {
+    "date": "2026-09-13",
+    "avatar": "Hidden on mobile using shared ChatPanel option",
+    "marginsCssPixels": 12,
+    "verified": "Chromium and WebKit: reply x <= 13, width >= 367 at 393px viewport; avatars hidden",
+    "log": "/tmp/marshal-mobile-message-width-verified.txt"
+  }
+}

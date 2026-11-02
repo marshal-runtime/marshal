@@ -1,0 +1,85 @@
+flowchart TD
+  DD["Datadog Workflow acme-agents-investigator<br/>repository_dispatch datadog-error-tracking<br/>payload: issue_id, service, error_type, error_message, stack_trace"] --> EN{"var ACME_AGENTS_ALERT_DISPATCH_ENABLED == true?"}
+  EN -- no --> X0["job skipped"]
+  EN -- yes --> UUID{"issue_id is a UUID?"}
+  UUID -- no --> X1["exit 1"]
+  UUID -- yes --> RUN["run.yml workflow=investigate<br/>write_mode = ALERT_WRITE_MODE on main, else dry-run<br/>concurrency investigate-issue_id"]
+  RUN --> PF{"live run?"}
+  PF -- yes --> PRE["requireLiveReady: creds, channel id pattern,<br/>refs/heads/main, Slack conversations.info"]
+  PF -- no --> DRY["dry-run root-cause store<br/>issue_records not written"]
+  PRE --> MIG["open Postgres ACME_AGENTS_DATABASE_URL, migrate()"]
+  DRY --> MIG
+  MIG --> READ["GET /api/v2/error-tracking/issues/id"]
+  READ --> TOUCH["issues.touch: UPSERT issue_records<br/>service, first_seen, dd_state OPEN"]
+  TOUCH --> GATE{"runGate: facts from investigations,<br/>fix_links, volume = max spans, ET count 24h"}
+
+  GATE -- "no prior investigation" --> FS["INVESTIGATE first_seen<br/>log.start: INSERT investigations"]
+  GATE -- "fix regressed, newer" --> INV["INVESTIGATE<br/>log.start: INSERT investigations"]
+  GATE -- "fix merged / deployed / watching" --> NOTE["NOTE fix_in_flight"]
+  GATE -- "volume 0, not an alert" --> NOTE
+  GATE -- "fix verified + new errors, verdict older than 14d,<br/>or root-cause code paths changed" --> INV
+  GATE -- "volume changed 2x and at least 10" --> REEST["RE_ESTIMATE: Linear comment,<br/>log.refreshVolume"]
+  GATE -- "failedAttempts >= 2" --> NOTE
+  GATE -- otherwise --> NOTE
+
+  NOTE --> TH{"root cause has a Slack thread?"}
+  REEST --> TH
+  TH -- "yes, reason != no_errors" --> OCC["UPDATE investigations.occurrences<br/>post recurrenceText in the thread"]
+  TH -- "yes, no_errors" --> SEEN["post seenText in the thread"]
+  TH -- no --> TOP["post top-level noteText"]
+
+  FS --> HAS{"alert has a service?"}
+  HAS -- no --> FULL
+  HAS -- yes --> CAND["rootCauses.recent: open root causes, last_seen within 24h,<br/>same component or a linked issue with the same service,<br/>minus candidates that rejected this issue"]
+  CAND --> JEV{"Jev reachable?"}
+  JEV -- yes --> JQ{"Jev known_root_cause p >= 0.7?"}
+  JEV -- "no / error" --> TXT{"text match: at least 3 shared tokens<br/>of length 4 or more?"}
+  JQ -- no --> BURST
+  TXT -- no --> BURST
+  JQ -- yes --> RE["re-estimator agent: ReEstimate confirmed?"]
+  TXT -- yes --> RE
+  RE -- "refuted / failed" --> BURST{"same-service live investigation<br/>started within 60 min and running?"}
+  BURST -- yes --> WAIT["poll every 60s, up to 30 min,<br/>then try the match once more"]
+  WAIT --> CAND
+  BURST -- no --> FULL
+  RE -- confirmed --> ATT["attachMatch:<br/>rootCauses.resolve with forced matcher<br/>root_cause_issues link_state confirmed, decided_by model:re-estimate<br/>log.complete, issue_records.root_cause_id<br/>Linear attachLink of the Datadog URL"]
+  ATT --> PM["post '🔗 New Datadog issue matched to root cause'<br/>in the root cause thread. No buttons. Datadog issue stays OPEN."]
+
+  INV --> FULL["post root message '🔎 Investigating'<br/>unless quiet or a known thread"]
+  FULL --> AG["investigator agent: acme checkout, datadog_read,<br/>Brain, Linear read, registry tools"]
+  AG --> CIT{"evidence citations valid?"}
+  CIT -- no --> FAIL["failRoot: edit root to '❌ failed', rethrow"]
+  CIT -- yes --> ROUTE["route Linear team; cap confidence at medium<br/>when coverage is partial"]
+  ROUTE --> MATCH{"chooseMatch against open root causes"}
+  MATCH -- "no candidates / no match" --> NEWRC["INSERT root_causes<br/>root_cause_issues confirmed"]
+  MATCH -- "Jev same >= 0.7, different and unclear < 0.5" --> PROP["root_cause_issues link_state proposed"]
+  PROP --> MC{"match-check agent, max 2"}
+  MC -- same --> CONF["confirmLink, decided_by model:match-check"]
+  MC -- different --> REJ["rejectLink, re-resolve the issue"] --> MATCH
+  NEWRC --> VER
+  CONF --> VER["log.complete; owner; suspect-PR author<br/>recordVerdict: issue_records severity, confidence,<br/>verdict_summary, verdict_sha, proposed_ticket"]
+  VER --> TK{"Linear ticket exists?"}
+  TK -- "yes, not closed" --> LC["Linear comment"]
+  TK -- "no, severity != noise" --> LN["Linear createIssue, recordTicket"]
+  TK -- "no, noise" --> LS["skipped_noise"]
+  LC --> SL
+  LN --> SL
+  LS --> SL["Slack: post result in the thread;<br/>recordThread if the root cause has none;<br/>merged into another thread: delete the root message"]
+  SL --> SEV{"verdict noise?"}
+  SEV -- no --> BPR["button draft_pr 'Draft a PR'"]
+  SEV -- yes --> BDD["buttons ignore_issue, resolve_issue, keep_issue_open"]
+  SL --> BIND["thread_sessions.bind investigator session"]
+
+  BPR --> GW{"gateway, Socket Mode:<br/>click in the pinned channel?"}
+  BDD --> GW
+  GW -- no --> IGN["ignored"]
+  GW -- "draft_pr" --> IMP["implement.yml: refuse if root_causes.status fixed;<br/>INSERT draft_prs, one active per root cause;<br/>planner, implementor, dev-env prover;<br/>push branch, open draft PR, Linear attachLink"]
+  GW -- "ignore / resolve / keep_open" --> DA["datadog-action.yml<br/>PUT error-tracking/issues/id/state IGNORED or RESOLVED<br/>gated by DATADOG_ACTION_WRITE_MODE<br/>replace the buttons with '✅ user resolved'"]
+
+  GHPR["GitHub PR merged webhook<br/>gateway → repository_dispatch fix_tracker"] --> LINK{"link the PR to a root cause:<br/>marker, then Datadog id, then Linear id, then file overlap"}
+  LINK --> FL["UPSERT fix_links fix_merged<br/>INSERT fix_link_events"]
+  FL --> ST["fix_deployed → watching"]
+  ST --> OUT{"errors after the deploy?"}
+  OUT -- none --> VF["verified: PUT state RESOLVED for each linked issue,<br/>close the Linear ticket, Slack line"]
+  OUT -- "errors back" --> RG["regressed: PUT state OPEN,<br/>reopen the Linear ticket, Slack line"]
+  RG -.-> GATE

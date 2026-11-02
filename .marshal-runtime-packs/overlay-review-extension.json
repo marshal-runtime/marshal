@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "extension": {
+    "name": "@marshal/overlay-review",
+    "version": "0.1.0",
+    "entrypoint": "dist/extension/runtime.cjs",
+    "entrySha256": "175e5a32eb0092bfea1241b1a601d28cceb2effcf31232d8fd47b022338de1cb",
+    "contentSha256": "785047616684690164ce76f037d1f381ad7e9b600d8e06e413b4bd1e3f93bfbc",
+    "integrity": {
+      "algorithm": "sha256",
+      "domain": "marshal-runtime-extension-package-v1",
+      "value": "16dd029c7aa33e84bb42fd0717c3c9c3eee691d9b72447f71d0be3ed4dbddf7a"
+    },
+    "archive": "marshal-overlay-review-0.1.0-marshal-host-2.tgz",
+    "archiveSha256": "91bdcb999040d7c1ec1e4798c0d14537aec68e452c97ce24f190452fe3347db7"
+  }
+}

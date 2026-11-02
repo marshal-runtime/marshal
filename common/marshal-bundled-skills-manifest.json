@@ -1,0 +1,44 @@
+{
+  "skills": [
+    {
+      "name": "agentic-browser",
+      "description": "Control Chrome or Edge directly through Agentic Browser and the Chrome DevTools Protocol"
+    },
+    {
+      "name": "pptx",
+      "description": "Create, read, or edit PowerPoint presentations (.pptx)"
+    },
+    {
+      "name": "docx",
+      "description": "Create, read, or edit Word documents (.docx)"
+    },
+    {
+      "name": "xlsx",
+      "description": "Create, read, or edit Excel spreadsheets (.xlsx, .csv)"
+    },
+    {
+      "name": "excalidraw",
+      "description": "Generate Excalidraw diagrams from descriptions"
+    },
+    {
+      "name": "web-artifacts-builder",
+      "description": "Build interactive web apps, dashboards, and data visualizations as self-contained HTML artifacts using React, Tailwind CSS, and shadcn/ui"
+    },
+    {
+      "name": "worktree.spawn-agent",
+      "description": "Launch and coordinate Marshal subagent sessions scoped to Co-create workspaces or git worktrees"
+    },
+    {
+      "name": "workflow-author",
+      "description": "Authoring skill for Marshal Dynamic Workflows — teaches the SDK, phase patterns, and anti-patterns; produces a repo-local workflow.ts (+ optional renderer.tsx) that is directly discoverable"
+    },
+    {
+      "name": "goals",
+      "description": "Author durable goal contracts with a P0 validation graph, structured evidence and hypotheses, fenced action envelopes, canonical predeclared reviewer validation requests, surrender/supersession, completion gates, and the goal* tools"
+    },
+    {
+      "name": "runtime-ui-authoring",
+      "description": "Authoring interactive Marshal Runtime UI: ui.compile/ui.render/ui.application.open loop, application manifests and actions, the marshal client, sandbox limits"
+    }
+  ]
+}

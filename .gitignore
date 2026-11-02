@@ -1,0 +1,134 @@
+.worktrees/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+release-fixed-v2
+
+node_modules
+sidecar/node_modules
+dist
+dist-ssr
+dist-electron
+dist-baileys-stage0
+dist-whatsapp-sidecar
+# Stale build artifact from the removed bundle-mcp-filesystem script; keep ignored
+# so a leftover local copy on machines that built it before the removal doesn't get linted.
+bundled-mcp
+node-bin
+*.local
+
+# Rust/Tauri
+src-tauri/target
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Runtime workspace
+workspace/
+release/
+!scripts/release/
+
+.worktrees/
+
+# Build artifacts
+*.tsbuildinfo
+.tmp-cross-deps/
+
+# Fallow incremental cache (rebuilt by `pnpm exec fallow`)
+.fallow/
+
+# Python artifacts (from repo-local Python helper scripts)
+__pycache__/
+*.pyc
+
+# Downloaded skills (rebuilt at build time via `npm run prebuild:skills`)
+bundled-skills/
+
+# Stray commit-message scratch files from agent commits
+.commitmsg.tmp
+
+
+go.bat
+
+# Marketplace secrets
+.env.marketplace
+
+test-screenshots/
+test-results/
+.vitest-attachments/
+playwright-report/
+e2e/perf-results.json
+perf-*/
+
+# Vitest browser failure captures. `screenshotFailures` defaults to true and the
+# browser project retries twice, so every failing test drops three PNGs next to
+# the source file. These are debugging output, not visual baselines -- no test
+# compares against them. Already-tracked captures are unaffected by this rule.
+**/__screenshots__/
+
+.claude/settings.local.json
+.claude/skills/
+.claude/worktrees/
+.github/skills/
+
+# Playwright CLI/MCP artifacts
+.playwright-cli/
+.playwright-mcp/
+
+# E2E real account test results (local only)
+e2e-real/results/
+
+# Visual review screenshots (local only)
+scripts/visual-review-results/
+
+.tmp-skills-download/
+
+# AI-generated design specs (local only)
+docs/superpowers/
+.superpowers/
+docs/plans/
+docs/specs/
+docs/type-aware-lint-violations.md
+
+# Per-reviewer trusted-contributor list for marshal-review-dashboard (local only).
+# One @login per line; '#' comments allowed. Authors here are surfaced ahead
+# of "other" PRs in the Needs review section, just below `maintainer`-labelled
+# PRs.
+skills/marshal-review-dashboard/.trusted-contributors
+.claude/scheduled_tasks.lock
+
+# Local-only dev tools for the marshal-review-queue worktree workflow.
+# Setup + cron-refresh scripts that move the queue onto a dedicated
+# `review-base` worktree are useful for individual reviewers but
+# shouldn't ship in the repo.
+tools/review-queue/scripts/
+
+# Marshal review-queue generated files.
+tools/review-queue/node_modules/
+tools/review-queue/dist/
+tools/review-queue/*.log
+tools/review-queue/**/.tmp-*/
+
+experiments/
+
+# Marshal runtime state root — generated at runtime (leases, review caches); never track
+.marshal-state/
+
+# Screenshots and reports that agent sessions drop into the repo root
+/*.png
+/*.jpg
+/*.txt

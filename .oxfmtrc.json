@@ -1,0 +1,10 @@
+{
+
+  "sortImports": {},
+  "sortPackageJson": { "sortScripts": true },
+  "sortTailwindcss": {
+    "stylesheet": "./src/index.css",
+    "functions": ["clsx", "cn"]
+  },
+  "ignorePatterns": ["dist/", "dist-electron/", "sidecar/", "package-lock.json"]
+}

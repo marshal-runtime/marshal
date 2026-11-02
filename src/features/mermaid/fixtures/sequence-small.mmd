@@ -1,0 +1,9 @@
+sequenceDiagram
+    participant U as User 👤
+    participant M as Marshal
+    participant R as Runtime
+    U->>M: Ask for a diagram of the deploy flow
+    M->>R: render(source)
+    R-->>M: SVG with node labels
+    Note over M,R: Labels are measured after fonts load
+    M-->>U: Interactive diagram 🎉

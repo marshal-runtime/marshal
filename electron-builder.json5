@@ -1,0 +1,204 @@
+// @see - https://www.electron.build/configuration/configuration
+{
+  $schema: "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  // Canonical Marshal application identity. See docs/architecture/36.
+  appId: "com.marshal",
+  asar: true,
+  afterPack: "./scripts/marshal-electron-builder-afterpack.cjs",
+  afterSign: "./scripts/marshal-electron-builder-aftersign.cjs",
+  afterAllArtifactBuild: "./scripts/marshal-electron-builder-afterallartifactbuild.cjs",
+  onNodeModuleFile: "./scripts/marshal-electron-builder-on-node-module-file.cjs",
+  electronFuses: {
+    runAsNode: false,
+    enableNodeOptionsEnvironmentVariable: false,
+    enableNodeCliInspectArguments: false,
+    enableCookieEncryption: true,
+    enableEmbeddedAsarIntegrityValidation: true,
+    onlyLoadAppFromAsar: true,
+    loadBrowserProcessSpecificV8Snapshot: false,
+    grantFileProtocolExtraPrivileges: false,
+    resetAdHocDarwinSignature: true,
+  },
+  asarUnpack: [
+    "**/dist-electron/preload.cjs",
+    "**/dist-electron/mini-mode-preload.cjs",
+    "**/dist-electron/mini-mode-page/**",
+    "node_modules/@playwright/**",
+    "node_modules/@agentic-browser/**",
+    "node_modules/@github/copilot/**",
+    "node_modules/@github/copilot-*/**",
+    "node_modules/@anthropic-ai/claude-agent-sdk/**",
+    "node_modules/@anthropic-ai/claude-agent-sdk-*/**",
+    "node_modules/@openai/codex/**",
+    "node_modules/@openai/codex-*/**",
+    "node_modules/@cursor/sdk/**",
+    "node_modules/@cursor/sdk-*/**",
+    "node_modules/@huggingface/**",
+    "node_modules/@marshal/**",
+    "node_modules/onnxruntime-common/**",
+    "node_modules/onnxruntime-node/**",
+    "node_modules/playwright/**",
+    "node_modules/playwright-core/**",
+    "node_modules/minimist/**",
+    "node_modules/esbuild/**",
+    "node_modules/@esbuild/**",
+    "node_modules/tree-sitter/**",
+    "node_modules/tree-sitter-*/**",
+    // The Runtime loads from app.asar.unpacked, where module resolution cannot see
+    // packages left inside the asar; tree-sitter requires node-gyp-build at load time.
+    "node_modules/node-gyp-build/**",
+    "node_modules/web-tree-sitter/**",
+    "node_modules/zod/**",
+  ],
+  productName: "Marshal",
+  directories: {
+    output: "release/${version}",
+  },
+  files: [
+    "dist",
+    "dist-electron",
+    "node_modules/@modelcontextprotocol/sdk/**/*",
+    "node_modules/@playwright/**/*",
+    "node_modules/@agentic-browser/**/*",
+    "node_modules/@github/copilot/**/*",
+    "node_modules/@github/copilot-*/**/*",
+    "node_modules/@anthropic-ai/claude-agent-sdk/**/*",
+    "node_modules/@anthropic-ai/claude-agent-sdk-*/**/*",
+    "node_modules/@openai/codex/**/*",
+    "node_modules/@openai/codex-*/**/*",
+    "node_modules/@cursor/sdk/**/*",
+    "node_modules/@cursor/sdk-*/**/*",
+    "node_modules/@huggingface/**/*",
+    "node_modules/@marshal/**/*",
+    "node_modules/onnxruntime-common/**/*",
+    "node_modules/onnxruntime-node/**/*",
+    "node_modules/playwright/**/*",
+    "node_modules/playwright-core/**/*",
+    "node_modules/minimist/**/*",
+    "node_modules/esbuild/**/*",
+    "node_modules/@esbuild/**/*",
+    "node_modules/tree-sitter/**/*",
+    "node_modules/tree-sitter-*/**/*",
+    "node_modules/web-tree-sitter/**/*",
+    // MCP SDK validation provider imports Ajv at runtime. Include Ajv + formats
+    // and Ajv's runtime dependencies explicitly so package.json files are present
+    // in ASAR for ESM package resolution.
+    {
+      from: "node_modules/@modelcontextprotocol/sdk/node_modules/ajv",
+      to: "node_modules/ajv",
+      filter: ["**/*"],
+    },
+    "node_modules/ajv-formats/**/*",
+    "node_modules/fast-deep-equal/**/*",
+    "node_modules/fast-uri/**/*",
+    "node_modules/json-schema-traverse/**/*",
+    "node_modules/require-from-string/**/*",
+    "node_modules/which/**/*",
+    "node_modules/isexe/**/*",
+    "node_modules/zod/**/*",
+    "node_modules/typescript/**/*",
+    "packages/workflow-sdk/src/**/*",
+    // No source maps in the asar (ours or bundled deps) — the installer ships on a public,
+    // unauthenticated download, so its contents are effectively public.
+    "!**/*.map",
+    "!dist-electron/runtime-acceptance-preload.cjs",
+  ],
+  mac: {
+    icon: "public/marshal-app-icon.icns",
+    target: [
+      {
+        target: "dmg",
+        arch: ["x64", "arm64"],
+      },
+    ],
+    artifactName: "Marshal-Mac-${version}-${arch}-Installer.${ext}",
+    category: "public.app-category.productivity",
+    hardenedRuntime: true,
+    gatekeeperAssess: false,
+    entitlements: "build/marshal-entitlements.mac.plist",
+    entitlementsInherit: "build/marshal-entitlements.mac.plist",
+  },
+  win: {
+    icon: "public/marshal-app-icon.ico",
+    executableName: "Marshal",
+    target: [
+      {
+        target: "nsis",
+        arch: ["x64"],
+      },
+    ],
+    extraFiles: [
+      {
+        from: "sidecar/node-runner.exe",
+        to: "node-runner.exe",
+      },
+    ],
+    signtoolOptions: {
+      sign: "./scripts/marshal-win-sign-callback.cjs",
+    },
+  },
+  nsis: {
+    oneClick: false,
+    perMachine: false,
+    allowElevation: false,
+    allowToChangeInstallationDirectory: true,
+    runAfterFinish: true,
+    deleteAppDataOnUninstall: false,
+    buildUniversalInstaller: false,
+    include: "build/marshal-installer.nsh",
+    // The afterAllArtifactBuild hook also publishes a legacy copy of the x64
+    // installer without the arch suffix for backward-compatible auto-updates.
+    // TODO: Remove the hook once all clients have the arch-aware updater.
+    artifactName: "Marshal-Windows-${version}-${arch}-Setup.${ext}",
+  },
+  publish: null,
+  linux: {
+    target: ["AppImage"],
+    artifactName: "Marshal-Linux-${version}.${ext}",
+  },
+  extraResources: [
+    {
+      from: "workspace",
+      to: "workspace",
+      filter: ["**/*"],
+    },
+    {
+      from: "dist-electron/preload.cjs",
+      to: "preload.cjs",
+    },
+    {
+      from: "dist-electron/mini-mode-preload.cjs",
+      to: "mini-mode-preload.cjs",
+    },
+    {
+      from: "dist-electron/mini-mode-page",
+      to: "mini-mode-page",
+      filter: ["**/*"],
+    },
+    {
+      from: "bundled-skills",
+      to: "bundled-skills",
+      filter: ["**/*"],
+    },
+    {
+      from: "node-bin/${os}-${arch}/",
+      to: "node/",
+    },
+    {
+      from: "resources/marshal-playwright-mcp-config.json",
+      to: "marshal-playwright-mcp-config.json",
+    },
+    {
+      from: "resources/marshal-playwright-init-egress-block.js",
+      to: "marshal-playwright-init-egress-block.js",
+    },
+    {
+      from: "scripts/marshal-cli.mjs",
+      to: "cli/marshal-cli.mjs",
+    },
+    {
+      from: "scripts/lib/user-extension-library.mjs",
+      to: "cli/lib/user-extension-library.mjs",
+    },
+  ],
+}
