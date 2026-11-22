@@ -36,6 +36,7 @@ import {
   movePanelToRegion,
   regionOfPanel,
   PROGRESS_PANEL_ID,
+  removeEmptyGroups,
   syncEdgeVisibility,
 } from "./dockLayout";
 import { maximizePanel, restorePanel, type MaximizedView } from "./dockMaximize";
@@ -181,6 +182,7 @@ export function SessionDock({
           if (panel.id !== CHAT_PANEL_ID) api.removePanel(panel);
         }
       }
+      removeEmptyGroups(api);
       ensureEdgeGroups(api);
       if (!api.getPanel(CHAT_PANEL_ID)) {
         addPanelInRegion(
@@ -406,7 +408,9 @@ export function SessionDock({
       }
     });
     dockApi.onDidLayoutChange(() => {
-      if (!dragging) syncEdgeVisibility(dockApi, false);
+      if (dragging) return;
+      removeEmptyGroups(dockApi);
+      syncEdgeVisibility(dockApi, false);
     });
     setApi(dockApi);
   }, []);

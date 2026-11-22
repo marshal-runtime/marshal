@@ -114,6 +114,16 @@ export function keepChatUsable(
   }
 }
 
+/**
+ * Removes empty panes outside the side and bottom docks. A saved layout can
+ * carry one, and the next session would inherit it as a blank pane beside the chat.
+ */
+export function removeEmptyGroups(api: DockviewApi): void {
+  for (const group of [...api.groups]) {
+    if (group.panels.length === 0 && group.api.location.type !== "edge") api.removeGroup(group);
+  }
+}
+
 /** Shows a dock that has tabs (or is a drop target mid-drag) and hides an empty one. */
 export function syncEdgeVisibility(api: DockviewApi, dragging: boolean): void {
   for (const [region, position] of [
