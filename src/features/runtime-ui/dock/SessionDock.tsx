@@ -29,6 +29,7 @@ import { DockFloatDropZone, type DockDragSubject } from "./DockFloatDropZone";
 import {
   addPanelInRegion,
   CHAT_PANEL_ID,
+  keepChatInCenter,
   keepChatUsable,
   DOCK_COMPONENT,
   ensureEdgeGroups,
@@ -192,12 +193,15 @@ export function SessionDock({
           false,
         );
       }
+      const repaired = keepChatInCenter(api);
       syncEdgeVisibility(api, false);
       if (rootRef.current) keepChatUsable(api, rootRef.current.getBoundingClientRect());
       setProgressOpen(api.getPanel(PROGRESS_PANEL_ID) !== undefined);
       if (complete) {
         loading.current = false;
         setLoaded({ key: scopeKey });
+        // Save the repaired arrangement so the broken one is not read again.
+        if (repaired) scheduleSave();
       } else {
         setLoaded(null);
       }
@@ -225,7 +229,7 @@ export function SessionDock({
         saveLayout(api, scope, instancesRef.current, dockReconciler);
       }
     };
-  }, [api, scope, scopeKey]);
+  }, [api, scope, scopeKey, scheduleSave]);
 
   useEffect(() => {
     if (!ready || !api) return;
@@ -410,6 +414,7 @@ export function SessionDock({
     dockApi.onDidLayoutChange(() => {
       if (dragging) return;
       removeEmptyGroups(dockApi);
+      keepChatInCenter(dockApi);
       syncEdgeVisibility(dockApi, false);
     });
     setApi(dockApi);
