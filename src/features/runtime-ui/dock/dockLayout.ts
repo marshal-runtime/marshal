@@ -84,11 +84,34 @@ function edgeGroup(api: DockviewApi, region: "side" | "bottom"): DockviewGroupPa
   );
 }
 
+/** The center group the chat tabs live in; never a side, bottom or floating dock. */
 export function chatGroup(api: DockviewApi): DockviewGroupPanel | undefined {
-  return (
-    api.getPanel(CHAT_PANEL_ID)?.group ??
-    api.groups.find((group) => regionOfGroup(group) === "chat")
-  );
+  const holder = api.getPanel(CHAT_PANEL_ID)?.group;
+  if (holder && regionOfGroup(holder) === "chat") return holder;
+  return api.groups.find((group) => regionOfGroup(group) === "chat");
+}
+
+// Dockview adds a panel without a reference group to the active group, which can be a dock.
+function ensureChatGroup(api: DockviewApi): DockviewGroupPanel {
+  return chatGroup(api) ?? api.addGroup();
+}
+
+/**
+ * Keeps the chat in the center. A layout saved with the chat in a dock would
+ * otherwise show an empty center, and every new chat would inherit it.
+ * Returns true when the chat was moved.
+ */
+export function keepChatInCenter(api: DockviewApi): boolean {
+  const chat = api.getPanel(CHAT_PANEL_ID);
+  if (!chat || regionOfPanel(chat) === "chat") return false;
+  const dock = chat.group;
+  chat.api.moveTo({ group: ensureChatGroup(api) });
+  chat.api.setActive();
+  // The dock had grown to fill the space the chat left; give it back its default size.
+  const position = dock.api.location.type === "edge" ? dock.api.location.position : undefined;
+  if (position === "right") dock.api.setSize({ width: DEFAULT_SIDE_SIZE });
+  if (position === "bottom") dock.api.setSize({ height: DEFAULT_BOTTOM_SIZE });
+  return true;
 }
 
 const MIN_CHAT_WIDTH = 320;
@@ -111,6 +134,16 @@ export function keepChatUsable(
   const maxBottom = dock.height - MIN_CHAT_HEIGHT;
   if (bottom && bottom.panels.length > 0 && maxBottom > 0 && bottom.height > maxBottom) {
     bottom.api.setSize({ height: maxBottom });
+  }
+}
+
+/**
+ * Removes empty panes outside the side and bottom docks. A saved layout can
+ * carry one, and the next session would inherit it as a blank pane beside the chat.
+ */
+export function removeEmptyGroups(api: DockviewApi): void {
+  for (const group of [...api.groups]) {
+    if (group.panels.length === 0 && group.api.location.type !== "edge") api.removeGroup(group);
   }
 }
 
@@ -148,7 +181,7 @@ export function addPanelInRegion(
     if (existing) return api.addPanel({ ...common, position: { referenceGroup: existing } });
     return api.addPanel({ ...common, floating: floatingBounds() });
   }
-  const target = region === "chat" ? chatGroup(api) : edgeGroup(api, region);
+  const target = region === "chat" ? ensureChatGroup(api) : edgeGroup(api, region);
   if (target) {
     if (region !== "chat") syncEdgeVisibilityFor(api, region, true);
     return api.addPanel({ ...common, position: { referenceGroup: target } });
@@ -166,7 +199,7 @@ export function movePanelToRegion(
     api.addFloatingGroup(panel, floatingBounds());
     return;
   }
-  const target = region === "chat" ? chatGroup(api) : edgeGroup(api, region);
+  const target = region === "chat" ? ensureChatGroup(api) : edgeGroup(api, region);
   if (!target) return;
   if (region !== "chat") syncEdgeVisibilityFor(api, region, true);
   panel.api.moveTo({ group: target });
